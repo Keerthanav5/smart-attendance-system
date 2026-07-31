@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Registration — RPA Smart Attendance System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;background:#0B1120;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden}
+body::before{content:'';position:absolute;top:10%;left:50%;width:600px;height:600px;background:radial-gradient(circle,rgba(109,93,246,0.08) 0%,transparent 70%);transform:translateX(-50%);pointer-events:none}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.card{background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;padding:40px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.3),0 0 40px rgba(109,93,246,0.06);border:1px solid rgba(255,255,255,0.1);animation:fadeInUp .5s ease;position:relative;z-index:1}
+.logo{text-align:center;margin-bottom:28px}
+.logo-icon{width:56px;height:56px;background:linear-gradient(135deg,#6D5DF6,#A855F7);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 12px;color:white;box-shadow:0 4px 15px rgba(109,93,246,0.3)}
+h2{font-family:'Poppins',sans-serif;font-size:1.4rem;font-weight:700;color:#E2E8F0;text-align:center}
+.subtitle{color:var(--muted);font-size:.875rem;text-align:center;margin-top:4px}
+.step-indicator{display:flex;gap:8px;margin:20px 0;align-items:center}
+.step{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,0.08);transition:background .3s}
+.step.active{background:linear-gradient(90deg,#6D5DF6,#A855F7);box-shadow:0 0 8px rgba(109,93,246,0.3)}
+.step.done{background:linear-gradient(90deg,#22C55E,#16A34A);box-shadow:0 0 8px rgba(34,197,94,0.3)}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:.85rem;font-weight:600;color:#E2E8F0;margin-bottom:6px}
+.form-control{width:100%;padding:11px 14px;border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;font-size:.9rem;color:#E2E8F0;outline:none;transition:all .25s;font-family:inherit;background:rgba(255,255,255,0.04)}
+.form-control:focus{border-color:#6D5DF6;box-shadow:0 0 0 3px rgba(109,93,246,0.15)}
+.form-control::placeholder{color:var(--muted)}
+.pw-wrap{position:relative}
+.pw-wrap .form-control{padding-right:44px}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)}
+.btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#6D5DF6,#A855F7);color:white;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;box-shadow:0 4px 20px rgba(109,93,246,0.35)}
+.btn-primary:hover{box-shadow:0 6px 30px rgba(109,93,246,0.55);transform:translateY(-2px)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.error-box{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:12px 14px;color:#FCA5A5;font-size:.875rem;margin-bottom:14px;display:none}
+.success-box{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:16px;color:#4ADE80;font-size:.875rem;margin-bottom:14px;text-align:center;display:none}
+.links{text-align:center;margin-top:18px;font-size:.82rem;color:var(--muted)}
+.links a{color:#A78BFA;font-weight:600;text-decoration:none;transition:color .2s}
+.links a:hover{color:#C4B5FD}
+.welcome-box{background:rgba(109,93,246,0.1);border:1px solid rgba(109,93,246,0.2);border-radius:10px;padding:14px;margin-bottom:18px;display:none}
+.welcome-box .wname{font-weight:700;color:#E2E8F0;font-size:1rem}
+.welcome-box .wsub{font-size:.8rem;color:var(--muted);margin-top:3px}
+.strength-wrap{margin-top:6px}
+.strength-bar{height:4px;border-radius:99px;background:rgba(255,255,255,0.08);overflow:hidden;margin-bottom:4px}
+.strength-fill{height:100%;width:0%;border-radius:99px;transition:width .3s,background .3s}
+.strength-label{font-size:.75rem;color:var(--muted)}
+.hint{font-size:.75rem;color:var(--muted);margin-top:4px}
+.spinner{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.2);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.countdown{font-size:1.1rem;font-weight:700;color:#4ADE80;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">👨‍🏫</div>
+    <h2>Teacher Registration</h2>
+    <p class="subtitle">Activate your teacher account for the first time</p>
+  </div>
+
+  <div class="step-indicator">
+    <div class="step active" id="step1bar"></div>
+    <div class="step" id="step2bar"></div>
+  </div>
+
+  <div id="errorBox" class="error-box"></div>
+  <div id="successBox" class="success-box"></div>
+
+  <!-- Step 1 -->
+  <div id="step1">
+    <div class="form-group">
+      <label class="form-label">Registered Email Address</label>
+      <input type="email" class="form-control" id="emailInput" placeholder="your.email@college.edu" autocomplete="email" onkeydown="if(event.key==='Enter')checkEmail()">
+      <div class="hint">Use the email address registered by your administrator</div>
+    </div>
+    <button class="btn-primary" id="step1Btn" onclick="checkEmail()">Continue →</button>
+  </div>
+
+  <!-- Step 2 -->
+  <div id="step2" style="display:none">
+    <div class="welcome-box" id="welcomeBox">
+      <div class="wname" id="welcomeName">Welcome!</div>
+      <div class="wsub" id="welcomeSub">Set your password to activate your account</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">New Password</label>
+      <div class="pw-wrap">
+        <input type="password" class="form-control" id="newPassword" placeholder="Min 8 characters" oninput="checkStrength(this.value)" onkeydown="if(event.key==='Enter')setPassword()">
+        <button class="toggle-pw" onclick="togglePw('newPassword',this)">👁</button>
+      </div>
+      <div class="strength-wrap">
+        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+        <span class="strength-label" id="strengthLabel"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confirm Password</label>
+      <div class="pw-wrap">
+        <input type="password" class="form-control" id="confirmPassword" placeholder="Re-enter your password" onkeydown="if(event.key==='Enter')setPassword()">
+        <button class="toggle-pw" onclick="togglePw('confirmPassword',this)">👁</button>
+      </div>
+    </div>
+    <button class="btn-primary" id="step2Btn" onclick="setPassword()">Activate Account ✓</button>
+    <div style="text-align:center;margin-top:12px">
+      <a href="#" onclick="goBack();return false;" style="font-size:.82rem;color:var(--primary)">← Change email</a>
+    </div>
+  </div>
+
+  <div class="links">
+    Already have an account? <a href="/teacher/login/">Login here</a>
+  </div>
+</div>
+
+<script>
+let verifiedEmail = '';
+
+function getCookie(n){const v=`; ${document.cookie}`,p=v.split(`; ${n}=`);if(p.length===2)return p.pop().split(';').shift();return '';}
+function showError(msg){const b=document.getElementById('errorBox');b.innerHTML=msg;b.style.display='block';}
+function hideError(){document.getElementById('errorBox').style.display='none';}
+function togglePw(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
+
+function checkStrength(pw){
+  const fill=document.getElementById('strengthFill');
+  const label=document.getElementById('strengthLabel');
+  if(!pw){fill.style.width='0%';label.textContent='';return;}
+  let score=0;
+  if(pw.length>=8) score++;
+  if(pw.length>=12) score++;
+  if(/[A-Z]/.test(pw)&&/[a-z]/.test(pw)) score++;
+  if(/[0-9]/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+  const levels=[
+    {w:'20%',bg:'#DC2626',txt:'Weak'},
+    {w:'40%',bg:'#D97706',txt:'Fair'},
+    {w:'65%',bg:'#2563eb',txt:'Good'},
+    {w:'85%',bg:'#16A34A',txt:'Strong'},
+    {w:'100%',bg:'#15803D',txt:'Very Strong'},
+  ];
+  const l=levels[Math.min(score,4)];
+  fill.style.width=l.w; fill.style.background=l.bg;
+  label.textContent=l.txt; label.style.color=l.bg;
+}
+
+async function checkEmail(){
+  const email=document.getElementById('emailInput').value.trim().toLowerCase();
+  if(!email){showError('Please enter your email address');return;}
+  hideError();
+  const btn=document.getElementById('step1Btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Checking...';
+  try{
+    const res=await fetch('/api/auth/teacher/check-email/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+      body:JSON.stringify({email})
+    });
+    const data=await res.json();
+    if(res.status===409){
+      showError(`${data.message||'Account already active.'} <a href="/teacher/login/" style="color:#DC2626;font-weight:700">Login here →</a>`);
+    } else if(!res.ok){
+      showError(data.error||'Something went wrong');
+    } else {
+      verifiedEmail=email;
+      document.getElementById('welcomeName').textContent=`Welcome, ${data.name}! 👋`;
+      document.getElementById('welcomeSub').textContent=`${email} — Set your password to activate your account`;
+      document.getElementById('welcomeBox').style.display='block';
+      document.getElementById('step1').style.display='none';
+      document.getElementById('step2').style.display='block';
+      document.getElementById('step1bar').classList.remove('active'); document.getElementById('step1bar').classList.add('done');
+      document.getElementById('step2bar').classList.add('active');
+      setTimeout(()=>document.getElementById('newPassword').focus(),100);
+    }
+  }catch(e){showError('Connection error. Please try again.');}
+  finally{btn.disabled=false;btn.innerHTML='Continue →';}
+}
+
+async function setPassword(){
+  const pw=document.getElementById('newPassword').value;
+  const cpw=document.getElementById('confirmPassword').value;
+  hideError();
+  if(!pw){showError('Please enter a password');return;}
+  if(pw.length<8){showError('Password must be at least 8 characters');return;}
+  if(pw!==cpw){showError('Passwords do not match');return;}
+  const btn=document.getElementById('step2Btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Activating...';
+  try{
+    const res=await fetch('/api/auth/teacher/set-password/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+      body:JSON.stringify({email:verifiedEmail,new_password:pw,confirm_password:cpw})
+    });
+    const data=await res.json();
+    if(!res.ok){showError(data.error||'Failed to activate account');}
+    else{
+      document.getElementById('step2').style.display='none';
+      document.getElementById('step2bar').classList.remove('active'); document.getElementById('step2bar').classList.add('done');
+      const sb=document.getElementById('successBox');
+      sb.style.display='block';
+      let count=3;
+      sb.innerHTML=`✅ Account activated successfully!<br><span class="countdown" id="cdNum">Redirecting in ${count}...</span>`;
+      const iv=setInterval(()=>{
+        count--;
+        if(count<=0){clearInterval(iv);window.location.href='/teacher/login/';}
+        else document.getElementById('cdNum').textContent=`Redirecting in ${count}...`;
+      },1000);
+    }
+  }catch(e){showError('Connection error. Please try again.');}
+  finally{btn.disabled=false;btn.innerHTML='Activate Account ✓';}
+}
+
+function goBack(){
+  hideError();
+  document.getElementById('step1').style.display='block';
+  document.getElementById('step2').style.display='none';
+  document.getElementById('step1bar').classList.add('active'); document.getElementById('step1bar').classList.remove('done');
+  document.getElementById('step2bar').classList.remove('active');
+  document.getElementById('emailInput').focus();
+}
+</script>
+</body>
+</html>

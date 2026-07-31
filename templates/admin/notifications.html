@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+{% block title %}Send Notifications — RPA Smart Attendance System{% endblock %}
+{% block page_title %}Send Notifications{% endblock %}
+{% block notif_bell %}{% endblock %}
+{% block sidebar_links %}
+<div class="nav-section">Main</div>
+<a class="nav-link" href="/admin-dashboard/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<div class="nav-section">Management</div>
+<a class="nav-link" href="/admin/departments/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/></svg> Departments</a>
+<a class="nav-link" href="/admin/classes/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Classes</a>
+<a class="nav-link" href="/admin/subjects/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Subjects</a>
+<a class="nav-link" href="/admin/teachers/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Teachers</a>
+<a class="nav-link" href="/admin/students/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg> Students</a>
+
+<div class="nav-section">Academic</div>
+<a class="nav-link" href="/admin/reports/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Reports</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.date-bar{display:flex;gap:12px;align-items:flex-end;margin-bottom:24px;flex-wrap:wrap}
+.subject-card{border:2px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;transition:border-color .2s}
+.subject-card.selected{border-color:var(--primary)}
+.subject-card-header{padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;background:rgba(255,255,255,0.04);transition:all .2s}
+.subject-card-header:hover{background:rgba(109,93,246,0.08)}
+.subject-card.selected .subject-card-header{background:rgba(109,93,246,0.12)}
+.subj-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.subject-card.selected .subj-check{background:var(--primary);border-color:var(--primary);color:white;box-shadow:0 0 8px rgba(109,93,246,0.3)}
+.subj-info{flex:1}
+.subj-title{font-weight:700;font-size:.95rem}
+.subj-meta{font-size:.78rem;color:var(--muted)}
+.subj-badge{font-size:.82rem;font-weight:700;padding:4px 12px;border-radius:99px;background:var(--danger-light);color:var(--danger)}
+.student-mini-list{background:var(--card);border-top:1px solid var(--border)}
+.student-mini-row{display:flex;align-items:center;gap:10px;padding:10px 18px 10px 50px;border-bottom:1px solid var(--border);font-size:.85rem}
+.student-mini-row:last-child{border-bottom:none}
+.sml-name{flex:1;font-weight:600}
+.sml-id{color:var(--muted);font-size:.78rem}
+.sml-email{color:var(--muted);font-size:.78rem}
+.sml-no-email{color:var(--danger);font-size:.78rem;font-style:italic}
+.result-table{font-size:.82rem}
+.result-table td{padding:8px 12px;border-bottom:1px solid var(--border)}
+.sticky-footer{position:sticky;bottom:0;background:rgba(17,24,39,0.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:16px 24px;margin:0 -20px;display:flex;justify-content:space-between;align-items:center;z-index:10}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="page-header">
+    <h1>Send Notifications</h1>
+    <span style="font-size:.85rem;color:var(--muted)">Send parent absence alerts by subject & date</span>
+  </div>
+
+  <!-- Date selector -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-body">
+      <div class="date-bar">
+        <div class="form-group" style="margin:0;min-width:200px">
+          <label class="form-label">Select Date</label>
+          <input class="form-control" type="date" id="dateInput">
+        </div>
+        <button class="btn btn-primary" onclick="loadAbsences()">Load Absences</button>
+        <button class="btn btn-secondary" onclick="selectAll()">Select All Subjects</button>
+        <button class="btn btn-secondary" onclick="deselectAll()">Deselect All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Absent summary by subject -->
+  <div id="absenceSection" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div>
+        <strong id="absenceTitle"></strong>
+        <span style="color:var(--muted);font-size:.85rem;margin-left:8px" id="absenceSubtitle"></span>
+      </div>
+    </div>
+
+    <div id="subjectList"></div>
+
+    <div class="sticky-footer">
+      <div style="font-size:.875rem;color:var(--muted)">
+        Selected: <strong id="selectedCount">0</strong> subjects &nbsp;·&nbsp;
+        Will notify: <strong id="notifyCount">0</strong> parents
+      </div>
+      <button class="btn btn-primary" id="sendBtn" onclick="sendNotifications()" style="padding:11px 32px">
+        📧 Send Notifications
+      </button>
+    </div>
+  </div>
+
+  <div id="emptyState" style="text-align:center;padding:60px;color:var(--muted)">
+    <div style="font-size:3rem;margin-bottom:12px">📬</div>
+    <p>Select a date and click "Load Absences" to see absent students</p>
+  </div>
+
+  <!-- Results card (shown after sending) -->
+  <div id="resultsCard" style="display:none;margin-top:20px">
+    <div class="card">
+      <div class="card-header">
+        <h3 id="resultsTitle">Notification Results</h3>
+        <div id="resultsSummary"></div>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div class="table-wrap">
+          <table class="result-table">
+            <thead><tr><th>Student</th><th>Subject</th><th>Parent Email</th><th>Status</th><th>Detail</th></tr></thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log card -->
+  <div class="card" style="margin-top:24px">
+    <div class="card-header">
+      <h3>📋 Notification Log — Today</h3>
+      <button class="btn btn-secondary btn-sm" onclick="loadLog()">↺ Refresh</button>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Student</th><th>Subject</th><th>Parent Email</th><th>Date</th><th>Status</th><th>Time</th></tr></thead>
+          <tbody id="logBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCookie(n){const v=`; ${document.cookie}`,p=v.split(`; ${n}=`);if(p.length===2)return p.pop().split(';').shift();return '';}
+
+/* { subject_id: { name, students: [{...}] } } */
+let subjectMap = {};
+let selectedSubjectIds = new Set();
+
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('dateInput').value = today;
+document.getElementById('dateInput').max   = today;
+
+/* ── Load absences grouped by subject ── */
+async function loadAbsences(){
+  const date = document.getElementById('dateInput').value;
+  if(!date){ showToast('Please select a date','error'); return; }
+
+  document.getElementById('subjectList').innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted)">Loading...</div>';
+  document.getElementById('absenceSection').style.display = 'block';
+  document.getElementById('emptyState').style.display     = 'none';
+  document.getElementById('resultsCard').style.display    = 'none';
+  selectedSubjectIds.clear();
+
+  try{
+    const r = await fetch(`/api/attendance/list/?date=${date}`);
+    const records = await r.json();
+    const absent  = records.filter(a => !a.is_present);
+
+    if(!absent.length){
+      document.getElementById('subjectList').innerHTML =
+        `<div style="text-align:center;padding:48px;color:var(--muted)">
+          <div style="font-size:2.5rem;margin-bottom:12px">✅</div>
+          <strong>No absences recorded on ${date}</strong>
+        </div>`;
+      document.getElementById('absenceTitle').textContent = 'No absences found';
+      document.getElementById('absenceSubtitle').textContent = '';
+      updateFooter();
+      return;
+    }
+
+    /* Group by subject */
+    subjectMap = {};
+    absent.forEach(a => {
+      const key = a.subject;
+      if(!subjectMap[key]) subjectMap[key] = { name: a.subject, students: [] };
+      subjectMap[key].students.push(a);
+    });
+
+    /* Also load subjects from API to get their IDs */
+    const sRes     = await fetch('/api/subjects/');
+    const subjects = await sRes.json();
+    const nameToId = {};
+    subjects.forEach(s => { nameToId[s.name] = s.id; });
+
+    /* Render */
+    const keys = Object.keys(subjectMap);
+    document.getElementById('absenceTitle').textContent   = `${absent.length} absent records on ${date}`;
+    document.getElementById('absenceSubtitle').textContent = `across ${keys.length} subject(s)`;
+
+    document.getElementById('subjectList').innerHTML = keys.map(subjectName => {
+      const { students } = subjectMap[subjectName];
+      const subjectId = nameToId[subjectName] || subjectName;
+      /* store id on map for later */
+      subjectMap[subjectName].id = subjectId;
+      const hasEmail = students.filter(s => s.parent_email || true).length; // always count for now
+      return `
+        <div class="subject-card" id="card_${subjectId}" onclick="toggleSubject('${subjectId}')">
+          <div class="subject-card-header">
+            <div class="subj-check" id="check_${subjectId}">✓</div>
+            <div class="subj-info">
+              <div class="subj-title">${subjectName}</div>
+              <div class="subj-meta">${students.length} absent student${students.length>1?'s':''}</div>
+            </div>
+            <span class="subj-badge">${students.length} absent</span>
+          </div>
+          <div class="student-mini-list">
+            ${students.map(s => `
+              <div class="student-mini-row">
+                <div class="sml-name">${s.name || s.student_id}</div>
+                <div class="sml-id">${s.student_id}</div>
+                ${s.parent_email
+                  ? `<div class="sml-email">📧 ${s.parent_email}</div>`
+                  : `<div class="sml-no-email">⚠ No parent email</div>`}
+              </div>`).join('')}
+          </div>
+        </div>`;
+    }).join('');
+
+    /* Auto-select all */
+    keys.forEach(k => selectedSubjectIds.add(subjectMap[k].id));
+    keys.forEach(k => {
+      const id = subjectMap[k].id;
+      document.getElementById('card_'+id)?.classList.add('selected');
+    });
+    updateFooter();
+
+  }catch(e){
+    console.error(e);
+    document.getElementById('subjectList').innerHTML =
+      '<div style="padding:24px;text-align:center;color:var(--danger)">Failed to load absences</div>';
+  }
+}
+
+function toggleSubject(id){
+  const card  = document.getElementById('card_'+id);
+  if(selectedSubjectIds.has(id)){
+    selectedSubjectIds.delete(id);
+    card.classList.remove('selected');
+  } else {
+    selectedSubjectIds.add(id);
+    card.classList.add('selected');
+  }
+  updateFooter();
+}
+
+function selectAll(){
+  Object.values(subjectMap).forEach(s => {
+    selectedSubjectIds.add(s.id);
+    document.getElementById('card_'+s.id)?.classList.add('selected');
+  });
+  updateFooter();
+}
+function deselectAll(){
+  selectedSubjectIds.clear();
+  Object.values(subjectMap).forEach(s =>
+    document.getElementById('card_'+s.id)?.classList.remove('selected'));
+  updateFooter();
+}
+
+function updateFooter(){
+  const selCount = selectedSubjectIds.size;
+  let notifyCount = 0;
+  Object.values(subjectMap).forEach(s => {
+    if(selectedSubjectIds.has(s.id)) notifyCount += s.students.length;
+  });
+  document.getElementById('selectedCount').textContent = selCount;
+  document.getElementById('notifyCount').textContent   = notifyCount;
+}
+
+/* ── Send notifications ── */
+async function sendNotifications(){
+  if(!selectedSubjectIds.size){
+    showToast('Please select at least one subject','error');
+    return;
+  }
+  const date = document.getElementById('dateInput').value;
+  const btn  = document.getElementById('sendBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Sending...';
+
+  try{
+    const res = await fetch('/api/notifications/send-alerts/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+      body: JSON.stringify({
+        date,
+        subject_ids: [...selectedSubjectIds].map(id => parseInt(id) || id),
+      }),
+    });
+    const data = await res.json();
+
+    if(res.ok){
+      showToast(data.message || 'Notifications sent!', 'success');
+      renderResults(data);
+      loadLog();
+    } else {
+      showToast(data.error || 'Failed to send', 'error');
+    }
+  }catch(e){
+    showToast('Connection error','error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '📧 Send Notifications';
+}
+
+function renderResults(data){
+  const card = document.getElementById('resultsCard');
+  card.style.display = 'block';
+  document.getElementById('resultsTitle').textContent = 'Notification Results';
+  document.getElementById('resultsSummary').innerHTML = `
+    <span class="badge badge-success">✅ ${data.sent} sent</span>&nbsp;
+    <span class="badge badge-danger">❌ ${data.failed} failed</span>&nbsp;
+    <span class="badge badge-warning">⏭ ${data.skipped} skipped</span>`;
+
+  const tbody = document.getElementById('resultsBody');
+  tbody.innerHTML = (data.details || []).map(d => {
+    const statusBadge = d.status === 'sent'
+      ? '<span class="badge badge-success">Sent</span>'
+      : d.status === 'skipped'
+      ? '<span class="badge badge-warning">Skipped</span>'
+      : '<span class="badge badge-danger">Failed</span>';
+    return `<tr>
+      <td><strong>${d.name||d.student}</strong></td>
+      <td>${d.subject||'—'}</td>
+      <td style="font-size:.78rem">${d.parent_email||'—'}</td>
+      <td>${statusBadge}</td>
+      <td style="font-size:.78rem;color:var(--muted)">${d.error||d.reason||''}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted)">No details</td></tr>';
+
+  card.scrollIntoView({behavior:'smooth'});
+}
+
+/* ── Notification log ── */
+async function loadLog(){
+  const date = document.getElementById('dateInput').value || new Date().toISOString().split('T')[0];
+  try{
+    const r    = await fetch(`/api/notifications/?date=${date}`);
+    const logs = await r.json();
+    const tbody = document.getElementById('logBody');
+    if(!logs.length){
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No notifications sent on ${date}</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = logs.map(l => {
+      const badge = l.status === 'SENT'
+        ? '<span class="badge badge-success">Sent</span>'
+        : '<span class="badge badge-danger">Failed</span>';
+      return `<tr>
+        <td><strong>${l.student_name||l.student_id}</strong><br><span style="font-size:.75rem;color:var(--muted)">${l.student_id}</span></td>
+        <td>${l.subject}</td>
+        <td style="font-size:.78rem">${l.parent_email}</td>
+        <td>${l.date}</td>
+        <td>${badge}</td>
+        <td style="font-size:.78rem">${l.sent_at}</td>
+      </tr>`;
+    }).join('');
+  }catch(e){ /* silent */ }
+}
+
+/* Boot */
+loadLog();
+</script>
+{% endblock %}

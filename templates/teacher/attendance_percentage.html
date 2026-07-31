@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block title %}Attendance Percentage — RPA Smart Attendance System{% endblock %}
+{% block page_title %}Attendance Percentage{% endblock %}
+{% block sidebar_links %}
+<div class="nav-section">Teacher Portal</div>
+<a class="nav-link" href="/teacher/dashboard/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<a class="nav-link" href="/teacher/mark-attendance/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg> Mark Attendance</a>
+<a class="nav-link" href="/teacher/edit-attendance/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg> Edit Attendance</a>
+<a class="nav-link active" href="/teacher/attendance-percentage/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Attendance Percentage</a>
+<a class="nav-link" href="/teacher/timetable/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Timetable</a>
+<a class="nav-link" href="/teacher/notifications/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Notifications</a>
+<a class="nav-link" href="/teacher/students/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg> Students View</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="page-header">
+    <h1>Attendance Percentage</h1>
+    <div style="display:flex;gap:10px" id="exportBtns" style="display:none">
+      <button class="btn btn-success" onclick="exportExcel()">⬇ Export Excel</button>
+      <button class="btn btn-secondary" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header"><h3>🔍 Filters</h3></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;align-items:end">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Department</label>
+          <select class="form-select" id="filterDept" onchange="loadClasses()">
+            <option value="">Select Department...</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Class</label>
+          <select class="form-select" id="filterClass" onchange="loadSemesters()">
+            <option value="">Select Class...</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Semester</label>
+          <select class="form-select" id="filterSemester" onchange="loadSubjects()">
+            <option value="">All Semesters...</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Subject</label>
+          <select class="form-select" id="filterSubject">
+            <option value="">All Subjects</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Min Attendance %</label>
+          <select class="form-select" id="filterMin">
+            <option value="">All</option>
+            <option value="below75">Below 75%</option>
+            <option value="below60">Below 60%</option>
+            <option value="above75">Above 75%</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:14px;align-items:end;margin-top:14px">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">From Date</label>
+          <input class="form-control" type="date" id="filterFrom">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">To Date</label>
+          <input class="form-control" type="date" id="filterTo">
+        </div>
+        <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="card" id="resultsCard" style="display:none">
+    <div class="card-header">
+      <h3>Results <span id="resultCount" class="badge badge-info"></span></h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-success btn-sm" onclick="exportExcel()">⬇ Excel</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportCSV()">⬇ CSV</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Print</button>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap">
+        <table id="reportsTable">
+          <thead>
+            <tr><th style="min-width:110px">Reg No</th><th style="min-width:130px">Name</th><th style="min-width:100px">Department</th><th style="min-width:80px">Class</th><th style="min-width:55px">Total</th><th style="min-width:60px">Present</th><th style="min-width:55px">Absent</th><th style="min-width:90px">Percentage</th><th style="min-width:70px">Status</th></tr>
+          </thead>
+          <tbody id="reportsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="emptyState" style="text-align:center;padding:60px;color:var(--muted)">
+    <div style="font-size:3rem;margin-bottom:12px">📊</div>
+    <p>Select filters and click Generate Report</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const token = localStorage.getItem('teacher_token')||'';
+function getCookie(n){const v=`; ${document.cookie}`,p=v.split(`; ${n}=`);if(p.length===2)return p.pop().split(';').shift();return '';}
+let reportData=[];let currentFilters={};
+
+async function loadDepts(){
+  const res=await fetch('/api/departments/');
+  const depts=await res.json();
+  document.getElementById('filterDept').innerHTML='<option value="">Select Department...</option>'+depts.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+}
+
+async function loadClasses(){
+  const deptId=document.getElementById('filterDept').value;
+  if(!deptId){document.getElementById('filterClass').innerHTML='<option value="">Select Class...</option>';return;}
+  const res=await fetch(`/api/classes/by-department/${deptId}/`);
+  const classes=await res.json();
+  document.getElementById('filterClass').innerHTML='<option value="">Select Class...</option>'+classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+}
+
+async function loadSemesters(){
+  const classId=document.getElementById('filterClass').value;
+  if(!classId){
+    document.getElementById('filterSemester').innerHTML='<option value="">All Semesters...</option>';
+    document.getElementById('filterSubject').innerHTML='<option value="">All Subjects</option>';
+    return;
+  }
+  const res=await fetch(`/api/classes/${classId}/semesters/`);
+  const sems=await res.json();
+  document.getElementById('filterSemester').innerHTML='<option value="">All Semesters...</option>'+sems.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  loadSubjects();
+}
+
+async function loadSubjects(){
+  const classId=document.getElementById('filterClass').value;
+  const semesterId=document.getElementById('filterSemester').value;
+  if(!classId){document.getElementById('filterSubject').innerHTML='<option value="">All Subjects</option>';return;}
+  
+  let url = `/api/subjects/by-class/${classId}/`;
+  if(semesterId) url = `/api/subjects/by-semester/${semesterId}/`;
+  
+  const res=await fetch(url);
+  const subs=await res.json();
+  document.getElementById('filterSubject').innerHTML='<option value="">All Subjects</option>'+subs.map(s=>`<option value="${s.id}">${s.name} (${s.semester__name || s.semester_name || 'N/A'})</option>`).join('');
+}
+
+async function generateReport(){
+  const deptId=document.getElementById('filterDept').value;
+  const classId=document.getElementById('filterClass').value;
+  if(!deptId){ showToast('Please select a Department', 'warning'); return; }
+  if(!classId){ showToast('Please select a Class', 'warning'); return; }
+  const subjectId=document.getElementById('filterSubject').value;
+  const semesterId=document.getElementById('filterSemester').value;
+  if(!semesterId){ showToast('Please select a Semester', 'warning'); return; }
+  const from=document.getElementById('filterFrom').value;
+  const to=document.getElementById('filterTo').value;
+  const minFilter=document.getElementById('filterMin').value;
+  
+  const params = {class_id:classId};
+  if(semesterId) params.semester_id = semesterId;
+  if(subjectId) params.subject_id = subjectId;
+  if(from) params.from = from;
+  if(to) params.to = to;
+  
+  currentFilters=params;
+  try{
+    const res=await fetch('/api/attendance/summary/?'+new URLSearchParams(params));
+    const data=await res.json();
+    let filtered=data.students || [];
+    const subjects=data.subjects || [];
+    
+    if(minFilter==='below75')filtered=filtered.filter(s=>s.percent<75);
+    else if(minFilter==='below60')filtered=filtered.filter(s=>s.percent<60);
+    else if(minFilter==='above75')filtered=filtered.filter(s=>s.percent>=75);
+    
+    renderTable(filtered, subjects);
+    document.getElementById('resultsCard').style.display='block';
+    document.getElementById('emptyState').style.display='none';
+    document.getElementById('resultCount').textContent=filtered.length+' students';
+  }catch(e){showToast('Failed to load report','error');}
+}
+
+function renderTable(data, subjects){
+  const tbody=document.getElementById('reportsTbody');
+  const thead=document.querySelector('#reportsTable thead tr');
+  
+  const subjectId=document.getElementById('filterSubject').value;
+  const showSubjects = !subjectId && subjects && subjects.length > 0;
+  
+  let headerHtml = '<th>Reg No</th><th>Name</th><th>Department</th><th>Class</th><th>Total</th><th>Present</th><th>Absent</th><th>Percentage</th>';
+  if(showSubjects){
+    subjects.forEach(sub => {
+      headerHtml += `<th style="min-width:85px">${sub.name} %</th>`;
+    });
+  }
+  headerHtml += '<th>Status</th>';
+  thead.innerHTML = headerHtml;
+
+  if(!data.length){
+    tbody.innerHTML=`<tr><td colspan="${8 + (showSubjects ? subjects.length : 0) + 1}" style="text-align:center;color:var(--muted);padding:24px">No records found</td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML=data.map(s=>{
+    const pct=s.percent;
+    const bg=pct>=75?'#DCFCE7':pct>=60?'#FEF9C3':'#FEE2E2';
+    const color=pct>=75?'#16A34A':pct>=60?'#D97706':'#DC2626';
+    const badge=pct>=75?'badge-success':pct>=60?'badge-warning':'badge-danger';
+    
+    let rowHtml = `<tr>
+      <td><strong>${s.student_id}</strong></td>
+      <td>${s.name||'—'}</td>
+      <td>${s.department||'—'}</td>
+      <td>${s.class_name||'—'}</td>
+      <td>${s.total}</td>
+      <td style="color:var(--success);font-weight:600">${s.present}</td>
+      <td style="color:var(--danger);font-weight:600">${s.absent}</td>
+      <td style="background:${bg};font-weight:800;color:${color};text-align:center">${pct}%</td>`;
+      
+    if(showSubjects){
+      subjects.forEach(sub => {
+        const subPct = s.subject_percents ? s.subject_percents[sub.id] : null;
+        if(subPct !== null && subPct !== undefined){
+            const sColor=subPct>=75?'#15803d':subPct>=60?'#a16207':'#b91c1c';
+            const sBg=subPct>=75?'#DCFCE7':subPct>=60?'#FEF9C3':'#FEE2E2';
+            rowHtml += `<td style="background:${sBg};text-align:center;font-weight:700;font-size:0.9rem;color:${sColor}">${subPct}%</td>`;
+        } else {
+            rowHtml += `<td style="text-align:center;color:var(--muted)">N/A</td>`;
+        }
+      });
+    }
+    
+    rowHtml += `<td><span class="badge ${badge}">${s.status}</span></td></tr>`;
+    return rowHtml;
+  }).join('');
+}
+
+async function exportExcel(){
+  try{
+    const res=await fetch('/api/reports/export/excel/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},body:JSON.stringify(currentFilters)});
+    if(!res.ok){ const txt=await res.text(); showToast('Excel export failed: '+txt,'error'); return; }
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='attendance_report.xlsx';a.click();
+    URL.revokeObjectURL(url);
+    showToast('Excel exported!','success');
+  }catch(e){ showToast('Excel export failed','error'); }
+}
+
+async function exportCSV(){
+  try{
+    const res=await fetch('/api/reports/export/csv/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},body:JSON.stringify(currentFilters)});
+    if(!res.ok){ const txt=await res.text(); showToast('CSV export failed: '+txt,'error'); return; }
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='attendance_report.csv';a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV exported!','success');
+  }catch(e){ showToast('CSV export failed','error'); }
+}
+
+loadDepts();
+document.getElementById('filterTo').value=new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

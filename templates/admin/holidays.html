@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% block title %}Holidays — RPA Smart Attendance System{% endblock %}
+{% block page_title %}Holidays{% endblock %}
+{% block notif_bell %}{% endblock %}
+{% block sidebar_links %}
+<div class="nav-section">Main</div>
+<a class="nav-link" href="/admin-dashboard/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<div class="nav-section">Management</div>
+<a class="nav-link" href="/admin/departments/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/></svg> Departments</a>
+<a class="nav-link" href="/admin/classes/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Classes</a>
+<a class="nav-link" href="/admin/subjects/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Subjects</a>
+<a class="nav-link" href="/admin/teachers/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Teachers</a>
+<a class="nav-link" href="/admin/students/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg> Students</a>
+
+<div class="nav-section">Academic</div>
+<a class="nav-link" href="/admin/reports/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Reports</a>
+{% endblock %}
+{% block extra_css %}
+<style>
+.holiday-list-item{display:flex;align-items:center;gap:14px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.04);margin-bottom:8px;transition:all .2s}
+.holiday-list-item:hover{background:rgba(109,93,246,0.08)}
+.holiday-date-badge{background:linear-gradient(135deg,var(--primary),var(--accent-purple));color:white;border-radius:8px;padding:8px 12px;text-align:center;min-width:60px;flex-shrink:0;box-shadow:0 2px 10px rgba(109,93,246,0.3)}
+.holiday-date-badge .hd-day{font-size:1.4rem;font-weight:700;line-height:1}
+.holiday-date-badge .hd-month{font-size:.7rem;text-transform:uppercase;font-weight:600;letter-spacing:.05em}
+.holiday-info{flex:1}
+.holiday-info .hi-name{font-weight:600;font-size:.95rem}
+.holiday-info .hi-dow{font-size:.8rem;color:var(--muted)}
+.upcoming-tag{background:rgba(245,158,11,0.15);color:#FBBF24;padding:3px 8px;border-radius:99px;font-size:.72rem;font-weight:600}
+.past-tag{background:rgba(255,255,255,0.06);color:var(--muted);padding:3px 8px;border-radius:99px;font-size:.72rem}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-content">
+  <div class="page-header">
+    <div><h1>Holidays</h1><p style="color:var(--muted);font-size:.85rem;margin-top:4px" id="subtitleTxt">Loading...</p></div>
+    <button class="btn btn-primary" onclick="openAdd()">+ Add Holiday</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 320px;gap:20px">
+    <div class="card">
+      <div class="card-header">
+        <h3>All Holidays</h3>
+        <div style="display:flex;gap:8px">
+          <select class="form-select" style="padding:6px 10px;font-size:.82rem" id="filterYear" onchange="applyFilter()">
+            <option value="">All Years</option>
+          </select>
+          <input class="form-control" id="searchInput" style="width:160px;padding:6px 10px;font-size:.82rem" placeholder="🔍 Search..." oninput="applyFilter()">
+        </div>
+      </div>
+      <div class="card-body" id="holidayList">
+        <div style="text-align:center;padding:40px;color:var(--muted)">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Sidebar: Upcoming + Stats -->
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><h3>📌 Upcoming</h3></div>
+        <div class="card-body" id="upcomingList">
+          <div style="color:var(--muted);font-size:.875rem">No upcoming holidays.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Summary</h3></div>
+        <div class="card-body" id="summaryCard"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="mTitle">Add Holiday</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Holiday Name *</label>
+        <input type="text" class="form-control" id="hName" placeholder="e.g. Diwali, Republic Day">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date *</label>
+        <input type="date" class="form-control" id="hDate">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveItem()">Save Holiday</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="delModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header"><h3>Delete Holiday</h3><button class="modal-close" onclick="document.getElementById('delModal').classList.remove('open')">×</button></div>
+    <div class="modal-body" style="text-align:center;padding:24px">
+      <div style="font-size:2.5rem;margin-bottom:12px">🗑️</div>
+      <p>Delete holiday <strong id="delName"></strong>?</p>
+      <p style="color:var(--muted);font-size:.875rem;margin-top:8px">Teachers will be able to mark attendance on this date again.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('delModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-danger" id="confirmDelBtn">Delete</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const csrf = getCookie('csrftoken');
+let allData = [];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+let editId = null;
+
+async function load(){
+  try{
+    allData = await fetch('/api/holidays/').then(r=>r.json());
+    allData.sort((a,b)=>a.date.localeCompare(b.date));
+    const years = [...new Set(allData.map(h=>h.date.slice(0,4)))];
+    const sel = document.getElementById('filterYear');
+    years.forEach(y=>sel.innerHTML+=`<option value="${y}">${y}</option>`);
+    const today = new Date().getFullYear();
+    if(years.includes(String(today))) sel.value=String(today);
+    renderStats();
+    renderUpcoming();
+    applyFilter();
+  }catch(e){ showToast('Failed to load','error'); }
+}
+
+function applyFilter(){
+  const yr = document.getElementById('filterYear').value;
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = allData;
+  if(yr) filtered = filtered.filter(h=>h.date.startsWith(yr));
+  if(q) filtered = filtered.filter(h=>h.name.toLowerCase().includes(q)||h.date.includes(q));
+  document.getElementById('subtitleTxt').textContent = `${filtered.length} holiday${filtered.length!==1?'s':''} shown of ${allData.length} total`;
+  renderList(filtered);
+}
+
+function renderList(data){
+  const el = document.getElementById('holidayList');
+  if(!data.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">No holidays found.</div>'; return; }
+  const today = new Date(); today.setHours(0,0,0,0);
+  el.innerHTML = data.map(h=>{
+    const d = new Date(h.date+'T00:00:00');
+    const isPast = d < today;
+    const isToday = d.toDateString() === today.toDateString();
+    const tag = isToday ? '<span class="upcoming-tag">TODAY 🎉</span>' : isPast ? '<span class="past-tag">Past</span>' : '<span class="upcoming-tag">Upcoming</span>';
+    return `<div class="holiday-list-item">
+      <div class="holiday-date-badge" style="${isPast?'background:var(--muted)':''}">
+        <div class="hd-day">${d.getDate()}</div>
+        <div class="hd-month">${MONTHS[d.getMonth()]}</div>
+      </div>
+      <div class="holiday-info">
+        <div class="hi-name">${h.name}</div>
+        <div class="hi-dow">${DAYS[d.getDay()]}, ${d.getFullYear()} &nbsp; ${tag}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-secondary btn-sm" onclick="openEdit(${h.id},'${esc(h.name)}','${h.date}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDel(${h.id},'${esc(h.name)}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderUpcoming(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = allData.filter(h=>new Date(h.date+'T00:00:00')>=today).slice(0,5);
+  const el = document.getElementById('upcomingList');
+  if(!upcoming.length){ el.innerHTML='<div style="color:var(--muted);font-size:.875rem">No upcoming holidays.</div>'; return; }
+  el.innerHTML = upcoming.map(h=>{
+    const d = new Date(h.date+'T00:00:00');
+    const diff = Math.round((d-today)/(1000*60*60*24));
+    const label = diff===0?'Today!':diff===1?'Tomorrow':`In ${diff} days`;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div><div style="font-weight:600;font-size:.875rem">${h.name}</div><div style="font-size:.78rem;color:var(--muted)">${d.getDate()} ${MONTHS_FULL[d.getMonth()]}</div></div>
+      <span class="upcoming-tag">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderStats(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const total = allData.length;
+  const upcoming = allData.filter(h=>new Date(h.date+'T00:00:00')>=today).length;
+  const thisYear = allData.filter(h=>h.date.startsWith(String(today.getFullYear()))).length;
+  document.getElementById('summaryCard').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Total Holidays</span><strong>${total}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">This Year</span><strong>${thisYear}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Upcoming</span><strong style="color:var(--primary)">${upcoming}</strong></div>
+    </div>`;
+}
+
+function esc(s){ return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function closeModal(){ document.getElementById('addModal').classList.remove('open'); }
+
+function openAdd(){
+  editId=null;
+  document.getElementById('mTitle').textContent='Add Holiday';
+  document.getElementById('hName').value='';
+  document.getElementById('hDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('saveBtn').textContent='Save Holiday';
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(()=>document.getElementById('hName').focus(),100);
+}
+
+function openEdit(id,name,date){
+  editId=id;
+  document.getElementById('mTitle').textContent='Edit Holiday';
+  document.getElementById('hName').value=name;
+  document.getElementById('hDate').value=date;
+  document.getElementById('saveBtn').textContent='Update Holiday';
+  document.getElementById('addModal').classList.add('open');
+}
+
+async function saveItem(){
+  const name=document.getElementById('hName').value.trim();
+  const date=document.getElementById('hDate').value;
+  if(!name||!date){ showToast('Name and date required','error'); return; }
+  const btn=document.getElementById('saveBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+  try{
+    const url=editId?`/api/holidays/${editId}/`:'/api/holidays/';
+    const res=await fetch(url,{method:editId?'PUT':'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},body:JSON.stringify({name,date})});
+    const d=await res.json();
+    if(!res.ok) throw new Error(d.error||'Save failed');
+    showToast(editId?'Holiday updated!':'Holiday added!','success');
+    closeModal(); load();
+  }catch(e){ showToast(e.message,'error'); }
+  finally{ btn.disabled=false; btn.textContent=editId?'Update Holiday':'Save Holiday'; }
+}
+
+function confirmDel(id,name){
+  document.getElementById('delName').textContent=name;
+  document.getElementById('confirmDelBtn').onclick=()=>deleteItem(id);
+  document.getElementById('delModal').classList.add('open');
+}
+async function deleteItem(id){
+  const btn=document.getElementById('confirmDelBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+  try{
+    const res=await fetch(`/api/holidays/${id}/`,{method:'DELETE',headers:{'X-CSRFToken':csrf}});
+    if(!res.ok) throw new Error('Delete failed');
+    showToast('Holiday deleted','success');
+    document.getElementById('delModal').classList.remove('open');
+    load();
+  }catch(e){ showToast(e.message,'error'); }
+  finally{ btn.disabled=false; btn.textContent='Delete'; }
+}
+
+load();
+</script>
+{% endblock %}

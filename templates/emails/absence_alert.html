@@ -1,0 +1,156 @@
+{% autoescape off %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Alert – RPA First Grade College</title>
+</head>
+<body style="margin:0;padding:0;background:#f0f2f5;font-family:'Segoe UI',Arial,sans-serif;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f0f2f5;padding:24px 0;">
+<tr><td align="center">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="580" style="max-width:580px;width:100%;margin:0 auto;">
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <tr><td style="background:linear-gradient(135deg,#6D5DF6 0%,#A855F7 50%,#7C3AED 100%);padding:32px 28px;border-radius:16px 16px 0 0;text-align:center;">
+    <div style="width:52px;height:52px;background:rgba(255,255,255,0.2);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;">
+      <span style="font-size:26px;">🎓</span>
+    </div>
+    <h1 style="color:white;margin:0;font-size:24px;font-weight:700;letter-spacing:0.5px;">Attendance Alert</h1>
+    <p style="color:rgba(255,255,255,0.9);margin:8px 0 0;font-size:14px;font-weight:500;">RPA FIRST GRADE COLLEGE</p>
+    <p style="color:rgba(255,255,255,0.7);margin:4px 0 0;font-size:12px;">RPA SMART ATTENDANCE SYSTEM</p>
+  </td></tr>
+
+  <!-- ═══════════════ ENGLISH SECTION ═══════════════ -->
+  <tr><td style="background:white;padding:32px 28px;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
+
+    <!-- Greeting -->
+    <p style="color:#1E293B;font-size:15px;line-height:1.8;margin:0 0 8px;">
+      Dear <strong>{{ parent_name }}</strong>,
+    </p>
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:0 0 16px;">
+      Greetings from <strong>RPA First Grade College</strong>.
+    </p>
+
+    <!-- Absence notice -->
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:0 0 16px;">
+      This is to kindly inform you that your child <strong style="color:#1E293B;">{{ student_name }}</strong>
+      (Register No: <strong>{{ student_id }}</strong>) was marked
+      <strong style="color:#DC2626;">ABSENT</strong> on
+      <strong>{{ date_formatted }}</strong> for the following subject(s):
+    </p>
+
+    <!-- Subject list -->
+    <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:18px 22px;margin:0 0 20px;">
+      <ul style="margin:0;padding-left:18px;list-style-type:disc;">
+        {% for subject in absent_subjects %}
+        <li style="padding:4px 0;color:#1E293B;font-size:14px;font-weight:500;">{{ subject }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Details table -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin:0 0 20px;">
+      <tr>
+        <td style="padding:10px 0;color:#64748B;font-size:14px;border-bottom:1px solid #F1F5F9;">Department</td>
+        <td style="padding:10px 0;color:#1E293B;font-weight:600;text-align:right;font-size:14px;border-bottom:1px solid #F1F5F9;">{{ dept_name }}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 0;color:#64748B;font-size:14px;border-bottom:1px solid #F1F5F9;">Class / Semester</td>
+        <td style="padding:10px 0;color:#1E293B;font-weight:600;text-align:right;font-size:14px;border-bottom:1px solid #F1F5F9;">{{ class_name }} · {{ semester_info }}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 0;color:#64748B;font-size:14px;border-bottom:1px solid #F1F5F9;">Overall Attendance</td>
+        <td style="padding:10px 0;font-weight:700;text-align:right;font-size:14px;border-bottom:1px solid #F1F5F9;color:{{ pct_color }};">{{ pct }}%</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 0;color:#64748B;font-size:14px;">Minimum Required</td>
+        <td style="padding:10px 0;color:#1E293B;font-weight:600;text-align:right;font-size:14px;">{{ min_pct }}%</td>
+      </tr>
+    </table>
+
+    <!-- Closing -->
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:0 0 6px;">
+      We request you to kindly ensure regular attendance for better academic progress.
+    </p>
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:0;">
+      Thank you.
+    </p>
+  </td></tr>
+
+  <!-- ═══════════════ DIVIDER ═══════════════ -->
+  <tr><td style="background:white;padding:0 28px;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
+    <div style="border-top:2px solid #E2E8F0;margin:0;"></div>
+  </td></tr>
+
+  <!-- ═══════════════ KANNADA SECTION ═══════════════ -->
+  <tr><td style="background:white;padding:28px;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
+
+    <!-- Kannada header -->
+    <div style="background:linear-gradient(135deg,#6D5DF6,#A855F7);border-radius:10px;padding:14px 18px;margin-bottom:20px;text-align:center;">
+      <p style="color:white;font-size:15px;font-weight:700;margin:0;">RPA ಫಸ್ಟ್ ಗ್ರೇಡ್ ಕಾಲೇಜ್</p>
+      <p style="color:rgba(255,255,255,0.8);font-size:12px;margin:4px 0 0;">RPA SMART ATTENDANCE SYSTEM</p>
+    </div>
+
+    <!-- Kannada greeting -->
+    <p style="color:#1E293B;font-size:14px;line-height:2;margin:0 0 8px;">
+      ಪ್ರಿಯ ಪೋಷಕರೇ,
+    </p>
+    <p style="color:#475569;font-size:13px;line-height:2;margin:0 0 14px;">
+      RPA ಫಸ್ಟ್ ಗ್ರೇಡ್ ಕಾಲೇಜಿನಿಂದ ವಂದನೆಗಳು.
+    </p>
+
+    <!-- Kannada absence notice -->
+    <p style="color:#475569;font-size:13px;line-height:2;margin:0 0 14px;">
+      ನಿಮ್ಮ ಮಗ/ಮಗಳು <strong style="color:#1E293B;">{{ student_name }}</strong> ಅವರು
+      ದಿನಾಂಕ <strong>{{ date_kannada }}</strong> ರಂದು ಕೆಳಗಿನ ವಿಷಯಗಳಿಗೆ
+      <strong style="color:#DC2626;">ಗೈರುಹಾಜರಾಗಿದ್ದಾರೆ</strong>:
+    </p>
+
+    <!-- Kannada subject list -->
+    <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:16px 20px;margin:0 0 18px;">
+      <ul style="margin:0;padding-left:18px;list-style-type:disc;">
+        {% for subject in absent_subjects %}
+        <li style="padding:4px 0;color:#1E293B;font-size:13px;font-weight:500;">{{ subject }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Kannada details -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin:0 0 18px;">
+      <tr>
+        <td style="padding:8px 0;color:#64748B;font-size:13px;border-bottom:1px solid #F1F5F9;">ವಿಭಾಗ (Department)</td>
+        <td style="padding:8px 0;color:#1E293B;font-weight:600;text-align:right;font-size:13px;border-bottom:1px solid #F1F5F9;">{{ dept_name }}</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;color:#64748B;font-size:13px;border-bottom:1px solid #F1F5F9;">ಸೆಮಿಸ್ಟರ್ (Semester)</td>
+        <td style="padding:8px 0;color:#1E293B;font-weight:600;text-align:right;font-size:13px;border-bottom:1px solid #F1F5F9;">{{ semester_info }}</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;color:#64748B;font-size:13px;">ದಿನಾಂಕ (Date)</td>
+        <td style="padding:8px 0;color:#1E293B;font-weight:600;text-align:right;font-size:13px;">{{ date_formatted }}</td>
+      </tr>
+    </table>
+
+    <!-- Kannada closing -->
+    <p style="color:#475569;font-size:13px;line-height:2;margin:0 0 6px;">
+      ವಿದ್ಯಾರ್ಥಿಯ ಉತ್ತಮ ಶೈಕ್ಷಣಿಕ ಪ್ರಗತಿಗಾಗಿ ನಿಯಮಿತ ಹಾಜರಾತಿಯನ್ನು ಖಚಿತಪಡಿಸುವಂತೆ ವಿನಂತಿಸುತ್ತೇವೆ.
+    </p>
+    <p style="color:#475569;font-size:13px;line-height:2;margin:0;">
+      ಧನ್ಯವಾದಗಳು.
+    </p>
+  </td></tr>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <tr><td style="background:#f8fafc;padding:20px 28px;border-radius:0 0 16px 16px;text-align:center;border:1px solid #E2E8F0;border-top:none;">
+    <p style="color:#6D5DF6;font-size:13px;font-weight:700;margin:0 0 4px;">RPA FIRST GRADE COLLEGE</p>
+    <p style="color:#94A3B8;font-size:12px;margin:0 0 4px;">RPA SMART ATTENDANCE SYSTEM</p>
+    <p style="color:#CBD5E1;font-size:11px;margin:0;">This is an automated notification. Please do not reply to this email.</p>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>
+{% endautoescape %}

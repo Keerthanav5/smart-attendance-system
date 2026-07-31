@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Subject Percentage — RPA Smart Attendance System{% endblock %}
+{% block page_title %}Subject Percentage{% endblock %}
+{% block sidebar_links %}
+<div class="nav-section">Student Portal</div>
+<a class="nav-link" href="/student/dashboard/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<a class="nav-link" href="/student/attendance/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg> Attendance Log</a>
+<a class="nav-link" href="/student/attendance-percentage/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Subject Percentage</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="page-header">
+    <h1>Subject-wise Percentage</h1>
+    <div style="display:flex;gap:10px" id="exportBtns">
+      <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="card" id="resultsCard">
+    <div class="card-header">
+      <h3>My Subjects <span id="resultCount" class="badge badge-info"></span></h3>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap">
+        <table id="reportsTable">
+          <thead>
+            <tr><th>Subject</th><th>Code</th><th>Total Classes</th><th>Present</th><th>Absent</th><th>Percentage</th><th>Status</th></tr>
+          </thead>
+          <tbody id="reportsTbody">
+             <tr><td colspan="7" style="text-align:center;padding:24px">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const token=localStorage.getItem('student_token')||'';
+if(!token){window.location.href='/student/login/';}
+const authHeaders={'Authorization':'Bearer '+token};
+
+document.getElementById('userName').textContent=localStorage.getItem('student_name')||'Student';
+document.getElementById('userRole').textContent='Reg: '+(localStorage.getItem('student_id')||'');
+document.getElementById('userAvatar').textContent=(localStorage.getItem('student_name')||'S').charAt(0).toUpperCase();
+
+async function loadData(){
+  try{
+    const res=await fetch('/api/student/dashboard/', {headers:authHeaders});
+    if(res.status===401){window.location.href='/student/login/';return;}
+    const data=await res.json();
+    renderTable(data.subject_breakdown || []);
+    document.getElementById('resultCount').textContent=(data.subject_breakdown?.length || 0)+' subjects';
+  }catch(e){showToast('Failed to load data','error');}
+}
+
+function renderTable(data){
+  const tbody=document.getElementById('reportsTbody');
+  if(!data.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No records found</td></tr>';return;}
+  tbody.innerHTML=data.map(s=>{
+    const pct=s.percent;
+    const bg=pct>=75?'#DCFCE7':pct>=60?'#FEF9C3':'#FEE2E2';
+    const color=pct>=75?'#16A34A':pct>=60?'#D97706':'#DC2626';
+    const badge=pct>=75?'badge-success':pct>=60?'badge-warning':'badge-danger';
+    return `<tr>
+      <td><strong>${s.subject}</strong></td>
+      <td>${s.code||'—'}</td>
+      <td>${s.total}</td>
+      <td style="color:var(--success);font-weight:600">${s.present}</td>
+      <td style="color:var(--danger);font-weight:600">${s.absent}</td>
+      <td style="background:${bg};font-weight:800;color:${color};text-align:center">${pct}%</td>
+      <td><span class="badge ${badge}">${s.status}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+loadData();
+</script>
+{% endblock %}

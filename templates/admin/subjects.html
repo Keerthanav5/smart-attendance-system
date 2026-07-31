@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}Subjects — RPA Smart Attendance System{% endblock %}
+{% block page_title %}Subjects{% endblock %}
+{% block notif_bell %}{% endblock %}
+{% block sidebar_links %}
+<div class="nav-section">Main</div>
+<a class="nav-link" href="/admin-dashboard/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<div class="nav-section">Management</div>
+<a class="nav-link" href="/admin/departments/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/></svg> Departments</a>
+<a class="nav-link" href="/admin/classes/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Classes</a>
+<a class="nav-link" href="/admin/subjects/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Subjects</a>
+<a class="nav-link" href="/admin/teachers/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Teachers</a>
+<a class="nav-link" href="/admin/students/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg> Students</a>
+
+<div class="nav-section">Academic</div>
+<a class="nav-link" href="/admin/reports/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Reports</a>
+{% endblock %}
+{% block content %}
+<div class="page-content">
+  <div class="page-header">
+    <div><h1>Subjects</h1><p style="color:var(--muted);font-size:.85rem;margin-top:4px" id="subtitleTxt">Loading...</p></div>
+    <div style="display:flex;gap:10px">
+      <select class="form-select" style="width:200px;padding:8px 12px;font-size:.875rem" id="filterClass" onchange="loadFilterSemesters()">
+        <option value="">All Classes</option>
+      </select>
+      <select class="form-select" style="width:200px;padding:8px 12px;font-size:.875rem" id="filterSemester" onchange="applyFilter()" disabled>
+        <option value="">All Semesters</option>
+      </select>
+      <button class="btn btn-danger" onclick="deleteAll()">🗑️ Delete All</button>
+      <button class="btn btn-primary" onclick="openAdd()">+ Add Subject</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>All Subjects</h3>
+      <input class="form-control" id="searchInput" style="width:220px;padding:7px 12px;font-size:.85rem" placeholder="🔍 Search..." oninput="applyFilter()">
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Subject Code</th><th>Subject Name</th><th>Class</th><th>Assigned Teacher</th><th>Actions</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="mTitle">Add Subject</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Subject Code *</label>
+          <input type="text" class="form-control" id="subjectCode" placeholder="e.g. CS301">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject Name *</label>
+          <input type="text" class="form-control" id="subjectName" placeholder="e.g. Data Structures">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Class *</label>
+          <select class="form-select" id="subjectClass" onchange="loadModalSemesters()">
+            <option value="">-- Select Class --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Semester *</label>
+          <select class="form-select" id="subjectSemester" disabled>
+            <option value="">-- Select Semester --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign Teacher</label>
+          <select class="form-select" id="subjectTeacher">
+            <option value="">-- No Teacher --</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveItem()">Save Subject</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="delModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header"><h3>Confirm Delete</h3><button class="modal-close" onclick="document.getElementById('delModal').classList.remove('open')">×</button></div>
+    <div class="modal-body" style="text-align:center;padding:24px">
+      <div style="font-size:2.5rem;margin-bottom:12px">⚠️</div>
+      <p style="font-weight:600;margin-bottom:6px">Delete <span id="delName"></span>?</p>
+      <p style="color:var(--muted);font-size:.875rem">All attendance records for this subject will also be deleted.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('delModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-danger" id="confirmDelBtn">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const csrf = getCookie('csrftoken');
+let allData=[], classes=[], teachers=[];
+let editId=null;
+
+async function load(){
+  try{
+    const [subjects,cls,tchs] = await Promise.all([
+      fetch('/api/subjects/').then(r=>r.json()),
+      fetch('/api/classes/').then(r=>r.json()),
+      fetch('/api/teachers/').then(r=>r.json()),
+    ]);
+    allData=subjects; classes=cls; teachers=tchs;
+    document.getElementById('subtitleTxt').textContent=`${subjects.length} subject${subjects.length!==1?'s':''} across ${cls.length} classes`;
+
+    const fcl=document.getElementById('filterClass');
+    const scl=document.getElementById('subjectClass');
+    cls.forEach(c=>{
+      fcl.innerHTML+=`<option value="${c.id}">${c.name}</option>`;
+      scl.innerHTML+=`<option value="${c.id}">${c.name}</option>`;
+    });
+    const st=document.getElementById('subjectTeacher');
+    tchs.forEach(t=>{ st.innerHTML+=`<option value="${t.id}">${t.name}</option>`; });
+    applyFilter();
+  }catch(e){ showToast('Failed to load','error'); }
+}
+
+async function loadFilterSemesters(){
+  const fcl=document.getElementById('filterClass').value;
+  const fsem=document.getElementById('filterSemester');
+  if(!fcl){
+    fsem.innerHTML='<option value="">All Semesters</option>';
+    fsem.disabled=true;
+    applyFilter();
+    return;
+  }
+  try {
+    const sems = await fetch(`/api/classes/${fcl}/semesters/`).then(r=>r.json());
+    fsem.innerHTML='<option value="">All Semesters</option>' + sems.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+    fsem.disabled=false;
+    applyFilter();
+  }catch(e){console.error(e);}
+}
+
+async function loadModalSemesters(selectedSemId=null){
+  const scl=document.getElementById('subjectClass').value;
+  const ssem=document.getElementById('subjectSemester');
+  if(!scl){
+    ssem.innerHTML='<option value="">-- Select Semester --</option>';
+    ssem.disabled=true;
+    return;
+  }
+  try {
+    const sems = await fetch(`/api/classes/${scl}/semesters/`).then(r=>r.json());
+    ssem.innerHTML='<option value="">-- Select Semester --</option>' + sems.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+    ssem.disabled=false;
+    if(selectedSemId) ssem.value=selectedSemId;
+  }catch(e){console.error(e);}
+}
+
+function applyFilter(){
+  const fClass=document.getElementById('filterClass').value;
+  const fSemester=document.getElementById('filterSemester').value;
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  let filtered=allData;
+  if(fClass) filtered=filtered.filter(s=>String(s.class_id)===fClass);
+  if(fSemester) filtered=filtered.filter(s=>String(s.semester_id)===fSemester);
+  if(q) filtered=filtered.filter(s=>s.name.toLowerCase().includes(q)||s.code.toLowerCase().includes(q));
+  renderTable(filtered);
+}
+
+function renderTable(data){
+  const t=document.getElementById('tbody');
+  if(!data.length){ t.innerHTML='<tr><td colspan="6" style="text-align:center;padding:48px;color:var(--muted)">No subjects found.</td></tr>'; return; }
+  t.innerHTML=data.map((s,i)=>`
+    <tr>
+      <td style="color:var(--muted);font-size:.8rem">${i+1}</td>
+      <td><span class="badge badge-info">${s.code}</span></td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.class_name||'—'} - ${s.semester_name||'—'}</td>
+      <td>${s.teacher_name?`<span class="badge badge-success">${s.teacher_name}</span>`:'<span style="color:var(--muted)">Unassigned</span>'}</td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn btn-secondary btn-sm" onclick="openEdit(${s.id},'${esc(s.code)}','${esc(s.name)}',${s.class_id||0},${s.semester_id||0},${s.teacher_id||0})"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg> Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDel(${s.id},'${esc(s.name)}')">🗑️</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function esc(s){ return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function openAdd(){ editId=null; document.getElementById('mTitle').textContent='Add Subject'; document.getElementById('subjectCode').value=''; document.getElementById('subjectName').value=''; document.getElementById('subjectClass').value=''; document.getElementById('subjectSemester').value=''; document.getElementById('subjectSemester').disabled=true; document.getElementById('subjectTeacher').value=''; document.getElementById('saveBtn').textContent='Save Subject'; document.getElementById('addModal').classList.add('open'); }
+function openEdit(id,code,name,classId,semId,teacherId){ editId=id; document.getElementById('mTitle').textContent='Edit Subject'; document.getElementById('subjectCode').value=code; document.getElementById('subjectName').value=name; document.getElementById('subjectClass').value=classId||''; document.getElementById('subjectTeacher').value=teacherId||''; loadModalSemesters(semId); document.getElementById('saveBtn').textContent='Update Subject'; document.getElementById('addModal').classList.add('open'); }
+function closeModal(){ document.getElementById('addModal').classList.remove('open'); }
+
+async function saveItem(){
+  const code=document.getElementById('subjectCode').value.trim();
+  const name=document.getElementById('subjectName').value.trim();
+  const semId=document.getElementById('subjectSemester').value;
+  const teacherId=document.getElementById('subjectTeacher').value;
+  if(!code||!name){ showToast('Code and name are required','error'); return; }
+  if(!semId){ showToast('Please select a semester','error'); return; }
+  const btn=document.getElementById('saveBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+  try{
+    const url=editId?`/api/subjects/${editId}/`:'/api/subjects/';
+    const body={code,name,semester_id:semId};
+    if(teacherId) body.teacher_id=teacherId;
+    const res=await fetch(url,{method:editId?'PUT':'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},body:JSON.stringify(body)});
+    const d=await res.json();
+    if(!res.ok) throw new Error(d.error||'Save failed');
+    showToast(editId?'Subject updated!':'Subject added!','success');
+    closeModal(); load();
+  }catch(e){ showToast(e.message,'error'); }
+  finally{ btn.disabled=false; btn.textContent=editId?'Update Subject':'Save Subject'; }
+}
+
+function confirmDel(id,name){
+  document.getElementById('delName').textContent=name;
+  document.getElementById('confirmDelBtn').onclick=()=>deleteItem(id);
+  document.getElementById('delModal').classList.add('open');
+}
+async function deleteItem(id){
+  const btn=document.getElementById('confirmDelBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+  try{
+    const res=await fetch(`/api/subjects/${id}/`,{method:'DELETE',headers:{'X-CSRFToken':csrf}});
+    if(!res.ok) throw new Error('Delete failed');
+    showToast('Subject deleted','success');
+    document.getElementById('delModal').classList.remove('open');
+    load();
+  }catch(e){ showToast(e.message,'error'); }
+  finally{ btn.disabled=false; btn.textContent='Yes, Delete'; }
+}
+
+load();
+
+async function deleteAll() {
+  const confirmed = prompt('⚠️ This will permanently delete ALL Subjects. Type "DELETE" to confirm:');
+  if (confirmed !== 'DELETE') { showToast('Cancelled — nothing was deleted', 'info'); return; }
+  try {
+    const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+    const res = await fetch('/api/delete-all/subjects/', {
+      method: 'DELETE',
+      headers: {'X-CSRFToken': csrf}
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(data.message, 'success');
+      setTimeout(() => location.reload(), 800);
+    } else {
+      showToast(data.error || 'Delete failed', 'error');
+    }
+  } catch(e) { showToast('Network error', 'error'); }
+}
+</script>
+{% endblock %}

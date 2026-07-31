@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Login — RPA Smart Attendance System</title>
+<meta name="description" content="Admin login portal for RPA Smart Attendance System">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:#0B1120;overflow:hidden}
+
+/* ── Left Hero Panel ────────────────────────────── */
+.left{background:linear-gradient(135deg,#0B1120 0%,#1a1040 30%,#6D5DF6 70%,#A855F7 100%);background-size:300% 300%;animation:gradientShift 12s ease infinite;display:flex;flex-direction:column;justify-content:center;padding:60px;color:white;position:relative;overflow:hidden}
+.left::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(109,93,246,0.15) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(168,85,247,0.1) 0%,transparent 40%);animation:subtleFloat 8s ease-in-out infinite}
+.left::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+
+/* Floating orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none;opacity:0.4}
+.orb-1{width:250px;height:250px;background:rgba(168,85,247,0.3);top:10%;right:-50px;animation:orbFloat 20s ease-in-out infinite}
+.orb-2{width:180px;height:180px;background:rgba(56,189,248,0.2);bottom:20%;left:-30px;animation:orbFloat 15s ease-in-out infinite reverse}
+.orb-3{width:120px;height:120px;background:rgba(109,93,246,0.25);top:60%;right:30%;animation:orbFloat 18s ease-in-out infinite 3s}
+
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes subtleFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-20px) rotate(1deg)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes orbFloat{0%{transform:translate(0,0) scale(1)}33%{transform:translate(20px,-25px) scale(1.05)}66%{transform:translate(-15px,15px) scale(0.95)}100%{transform:translate(0,0) scale(1)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 4px 20px rgba(109,93,246,0.35)}50%{box-shadow:0 4px 40px rgba(109,93,246,0.6)}}
+
+.left .brand{position:relative;z-index:1;animation:fadeInUp .6s ease}
+.left .brand-icon{width:56px;height:56px;background:rgba(255,255,255,0.12);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.2);border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.left .brand-icon svg{width:28px;height:28px;color:#fff;stroke-width:1.8}
+.left h1{font-family:'Poppins',sans-serif;font-size:2rem;font-weight:800;margin-bottom:6px;line-height:1.2}
+.left .brand-name{font-size:1rem;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:8px}
+.left p{opacity:.8;font-size:.95rem;line-height:1.7;margin-bottom:36px}
+
+.features{position:relative;z-index:1}
+.feature{display:flex;align-items:center;gap:14px;margin-bottom:16px;animation:fadeInUp .6s ease backwards}
+.feature:nth-child(1){animation-delay:.1s}
+.feature:nth-child(2){animation-delay:.2s}
+.feature:nth-child(3){animation-delay:.3s}
+.feature:nth-child(4){animation-delay:.4s}
+.f-icon{width:42px;height:42px;background:rgba(255,255,255,.08);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s}
+.f-icon svg{width:20px;height:20px;color:rgba(255,255,255,0.85);stroke-width:1.8}
+.feature:hover .f-icon{background:rgba(255,255,255,.15);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.15)}
+.f-text{font-size:.9rem;opacity:.85;font-weight:500}
+
+/* ── Right Login Panel ──────────────────────────── */
+.right{display:flex;align-items:center;justify-content:center;padding:40px;background:#0B1120;position:relative}
+.right::before{content:'';position:absolute;top:15%;left:-60px;width:350px;height:350px;background:radial-gradient(circle,rgba(109,93,246,0.06) 0%,transparent 70%);pointer-events:none}
+.right::after{content:'';position:absolute;bottom:10%;right:-40px;width:250px;height:250px;background:radial-gradient(circle,rgba(168,85,247,0.04) 0%,transparent 70%);pointer-events:none}
+
+.card{background:rgba(255,255,255,0.04);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:20px;padding:44px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.3),0 0 40px rgba(109,93,246,0.06);border:1px solid rgba(255,255,255,0.08);animation:fadeInUp .5s ease;position:relative}
+.card::before{content:'';position:absolute;top:-1px;left:20%;right:20%;height:2px;background:linear-gradient(90deg,transparent,rgba(109,93,246,0.5),transparent);border-radius:2px}
+
+.card h2{font-family:'Poppins',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:4px;color:#E2E8F0}
+.subtitle{color:#94A3B8;font-size:.9rem;margin-bottom:26px}
+.role-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(109,93,246,0.12);color:#A78BFA;padding:5px 14px;border-radius:99px;font-size:.8rem;font-weight:600;margin-bottom:20px;border:1px solid rgba(109,93,246,0.2)}
+.role-badge svg{width:14px;height:14px}
+
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:.85rem;font-weight:600;color:#E2E8F0;margin-bottom:6px}
+.input-wrap{position:relative}
+.form-control{width:100%;padding:12px 14px;border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;font-size:.95rem;outline:none;transition:all .3s cubic-bezier(.4,0,.2,1);font-family:inherit;color:#E2E8F0;background:rgba(255,255,255,0.04)}
+.form-control:focus{border-color:#6D5DF6;box-shadow:0 0 0 3px rgba(109,93,246,0.15),0 0 20px rgba(109,93,246,0.06)}
+.form-control::placeholder{color:#64748B}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748B;font-size:1rem;transition:color .2s}
+.toggle-pw:hover{color:#A78BFA}
+.forgot-link{display:block;text-align:right;font-size:.82rem;color:#A78BFA;font-weight:600;margin-top:-8px;margin-bottom:16px;text-decoration:none;transition:color .2s}
+.forgot-link:hover{color:#C4B5FD}
+.remember-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.remember-label{display:flex;align-items:center;gap:8px;font-size:.82rem;color:#94A3B8;cursor:pointer}
+.remember-label input[type="checkbox"]{width:16px;height:16px;accent-color:#6D5DF6;cursor:pointer}
+
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#6D5DF6,#A855F7);color:white;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;box-shadow:0 4px 20px rgba(109,93,246,0.35);position:relative;overflow:hidden}
+.btn-login::before{content:'';position:absolute;inset:-2px;background:linear-gradient(135deg,#6D5DF6,#A855F7,#38BDF8);border-radius:inherit;z-index:-1;opacity:0;transition:opacity .3s;filter:blur(12px)}
+.btn-login:hover{box-shadow:0 6px 30px rgba(109,93,246,0.55);transform:translateY(-2px)}
+.btn-login:hover::before{opacity:1}
+.btn-login:disabled{opacity:.65;cursor:not-allowed;transform:none}
+
+.error-box{display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;color:#FCA5A5;font-size:.875rem;animation:fadeInUp .2s ease}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:#64748B;font-size:.78rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.06)}
+.links{text-align:center;margin-top:6px;font-size:.85rem;color:#94A3B8}
+.links a{color:#A78BFA;font-weight:600;transition:color .2s;text-decoration:none}
+.links a:hover{color:#C4B5FD}
+.spinner{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.2);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Footer */
+.login-footer{position:absolute;bottom:20px;left:0;right:0;text-align:center;font-size:.72rem;color:rgba(255,255,255,0.25);padding:0 40px}
+
+@media(max-width:768px){
+  body{grid-template-columns:1fr}
+  .left{display:none}
+  .right{background:#0B1120;padding:24px}
+}
+</style>
+</head>
+<body>
+<div class="left">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="brand">
+    <div class="brand-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg>
+    </div>
+    <h1>RPA Smart Attendance</h1>
+    <p>Smart attendance management for modern educational institutions.</p>
+  </div>
+  <div class="features">
+    <div class="feature"><div class="f-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div><div class="f-text">Real-time attendance tracking & analytics</div></div>
+    <div class="feature"><div class="f-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></div><div class="f-text">Automatic parent email notifications</div></div>
+    <div class="feature"><div class="f-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg></div><div class="f-text">Bulk student upload via Excel & CSV</div></div>
+    <div class="feature"><div class="f-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></div><div class="f-text">Mobile-friendly teacher portal</div></div>
+  </div>
+</div>
+<div class="right">
+  <div class="card">
+    <div class="role-badge"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Admin Portal</div>
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Sign in to manage your institution</p>
+    <div class="error-box" id="errorBox"></div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-control" type="text" id="username" placeholder="Enter admin username" autofocus autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="input-wrap">
+        <input class="form-control" type="password" id="password" placeholder="Enter password" autocomplete="current-password">
+        <button class="toggle-pw" onclick="togglePw('password',this)">👁</button>
+      </div>
+    </div>
+    <a class="forgot-link" href="/admin/forgot-password/">Forgot Password?</a>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign In</button>
+    <div class="divider">or continue as</div>
+    <div class="links">
+      <a href="/teacher/login/">Teacher Login</a> &nbsp;·&nbsp; <a href="/student/login/">Student Login</a>
+    </div>
+    <div class="links" style="margin-top:12px">
+      New admin? <a href="/admin/register/">Register here</a>
+    </div>
+  </div>
+  <div class="login-footer">© 2026 RPA Smart Attendance System · RPA First Grade College</div>
+</div>
+<script>
+function getCookie(n){const v=`; ${document.cookie}`,p=v.split(`; ${n}=`);if(p.length===2)return p.pop().split(';').shift();return '';}
+function togglePw(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
+function showError(msg){const b=document.getElementById('errorBox');b.textContent=msg;b.style.display='block';}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+async function doLogin(){
+  const username=document.getElementById('username').value.trim();
+  const password=document.getElementById('password').value.trim();
+  if(!username||!password){showError('Please enter username and password');return;}
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Signing in...';
+  document.getElementById('errorBox').style.display='none';
+  try{
+    const res=await fetch('/api/auth/admin-login/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},body:JSON.stringify({username,password})});
+    const data=await res.json();
+    if(res.ok){window.location.href=data.redirect||'/admin-dashboard/';}
+    else{showError(data.error||'Login failed');btn.disabled=false;btn.innerHTML='Sign In';}
+  }catch(e){showError('Connection error. Try again.');btn.disabled=false;btn.innerHTML='Sign In';}
+}
+</script>
+</body>
+</html>

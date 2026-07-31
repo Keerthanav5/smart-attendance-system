@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Forgot Password — RPA Smart Attendance System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;min-height:100vh;background:#0B1120;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}
+body::before{content:'';position:absolute;top:10%;left:50%;width:600px;height:600px;background:radial-gradient(circle,rgba(56,189,248,0.08) 0%,transparent 70%);transform:translateX(-50%);pointer-events:none}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.card{background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:18px;padding:44px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.3),0 0 40px rgba(56,189,248,0.06);border:1px solid rgba(255,255,255,0.1);animation:fadeInUp .5s ease;position:relative;z-index:1}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.85rem;margin-bottom:24px;font-weight:500;text-decoration:none;transition:color .2s}
+.back-link:hover{color:#7DD3FC}
+.icon-wrap{width:60px;height:60px;background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.2));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:20px;border:1px solid rgba(56,189,248,0.15)}
+.card h2{font-family:'Poppins',sans-serif;font-size:1.4rem;font-weight:800;color:#E2E8F0;margin-bottom:6px}
+.subtitle{color:var(--muted);font-size:.875rem;line-height:1.6;margin-bottom:28px}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:.85rem;font-weight:600;color:#E2E8F0;margin-bottom:6px}
+.form-control{width:100%;padding:11px 14px;border:1.5px solid rgba(255,255,255,0.1);border-radius:9px;font-size:.95rem;outline:none;transition:all .25s;font-family:inherit;color:#E2E8F0;background:rgba(255,255,255,0.04)}
+.form-control:focus{border-color:#38BDF8;box-shadow:0 0 0 3px rgba(56,189,248,0.15)}
+.form-control::placeholder{color:var(--muted)}
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#6D5DF6,#A855F7);color:white;border:none;border-radius:9px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;box-shadow:0 4px 20px rgba(109,93,246,0.35)}
+.btn-primary:hover{box-shadow:0 6px 30px rgba(109,93,246,0.55);transform:translateY(-2px)}
+.btn-primary:disabled{opacity:.65;cursor:not-allowed;transform:none}
+.error-box{display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;margin-bottom:14px;color:#FCA5A5;font-size:.875rem}
+.success-card{display:none;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:24px;text-align:center}
+.success-card .s-icon{font-size:2.5rem;margin-bottom:12px}
+.success-card h3{color:#4ADE80;font-size:1.1rem;margin-bottom:8px;font-family:'Poppins',sans-serif}
+.success-card p{color:#86EFAC;font-size:.875rem;line-height:1.6}
+.success-card a{display:inline-block;margin-top:16px;color:#A78BFA;font-weight:600;font-size:.875rem;text-decoration:none;transition:color .2s}
+.success-card a:hover{color:#C4B5FD}
+.spinner{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.2);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="card">
+  <a class="back-link" href="/student/login/">← Back to Login</a>
+  <div class="icon-wrap">🔑</div>
+  <h2>Forgot Password?</h2>
+  <p class="subtitle">Enter your register number. We'll send a password reset link to your registered parent email.</p>
+  <div class="error-box" id="errorBox"></div>
+  <div id="formSection">
+    <div class="form-group">
+      <label class="form-label">Register Number</label>
+      <input class="form-control" type="text" id="register_number" placeholder="e.g. 22UUCMS001" autofocus>
+    </div>
+    <button class="btn-primary" id="sendBtn" onclick="sendReset()">Send Reset Link</button>
+  </div>
+  <div class="success-card" id="successCard">
+    <div class="s-icon">✉️</div>
+    <h3>Reset Link Sent!</h3>
+    <p>A password reset link has been sent to your registered email address. The link expires in <strong>1 hour</strong>.<br><br>Check the email associated with your register number.</p>
+    <a href="/student/login/">← Back to Login</a>
+  </div>
+</div>
+<script>
+function getCookie(n){const v=`; ${document.cookie}`,p=v.split(`; ${n}=`);if(p.length===2)return p.pop().split(';').shift();return '';}
+function showError(msg){const b=document.getElementById('errorBox');b.textContent=msg;b.style.display='block';}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')sendReset();});
+async function sendReset(){
+  const register_number=document.getElementById('register_number').value.trim();
+  if(!register_number){showError('Please enter your register number');return;}
+  const btn=document.getElementById('sendBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Sending...';
+  document.getElementById('errorBox').style.display='none';
+  try{
+    const res=await fetch('/api/auth/forgot-password/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},body:JSON.stringify({role:'student',register_number})});
+    const data=await res.json();
+    if(res.ok){
+      document.getElementById('formSection').style.display='none';
+      document.getElementById('successCard').style.display='block';
+    }else{showError(data.error||'Something went wrong');btn.disabled=false;btn.innerHTML='Send Reset Link';}
+  }catch(e){showError('Connection error. Try again.');btn.disabled=false;btn.innerHTML='Send Reset Link';}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Registration — RPA Smart Attendance System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:#0B1120}
+.left{background:linear-gradient(135deg,#0B1120 0%,#1a1040 30%,#6D5DF6 70%,#A855F7 100%);background-size:300% 300%;animation:gradientShift 12s ease infinite;display:flex;flex-direction:column;justify-content:center;padding:60px;color:white;position:relative;overflow:hidden}
+.left::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(109,93,246,0.15) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(168,85,247,0.1) 0%,transparent 40%);animation:subtleFloat 8s ease-in-out infinite}
+.left::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes subtleFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-20px) rotate(1deg)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.left h1{font-family:'Poppins',sans-serif;font-size:2.2rem;font-weight:800;margin-bottom:10px;position:relative;z-index:1}
+.left p{opacity:.85;font-size:1rem;line-height:1.7;margin-bottom:40px;position:relative;z-index:1}
+.feature{display:flex;align-items:center;gap:14px;margin-bottom:18px;position:relative;z-index:1}
+.f-icon{width:40px;height:40px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.f-text{font-size:.9rem;opacity:.9}
+.right{display:flex;align-items:center;justify-content:center;padding:40px;background:#0B1120;overflow-y:auto;position:relative}
+.right::before{content:'';position:absolute;top:20%;left:-40px;width:300px;height:300px;background:radial-gradient(circle,rgba(109,93,246,0.08) 0%,transparent 70%);pointer-events:none}
+.card{background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:18px;padding:44px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.3),0 0 40px rgba(109,93,246,0.06);border:1px solid rgba(255,255,255,0.1);animation:fadeInUp .5s ease}
+.role-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(109,93,246,0.15);color:#A78BFA;padding:5px 12px;border-radius:99px;font-size:.8rem;font-weight:600;margin-bottom:16px;border:1px solid rgba(109,93,246,0.2)}
+.card h2{font-family:'Poppins',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:4px;color:#E2E8F0}
+.subtitle{color:var(--muted);font-size:.9rem;margin-bottom:24px}
+.step-indicator{display:flex;gap:8px;margin-bottom:24px;align-items:center}
+.step{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,0.08);transition:background .3s}
+.step.active{background:linear-gradient(90deg,#6D5DF6,#A855F7);box-shadow:0 0 8px rgba(109,93,246,0.3)}
+.step.done{background:linear-gradient(90deg,#22C55E,#16A34A);box-shadow:0 0 8px rgba(34,197,94,0.3)}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:.85rem;font-weight:600;color:#E2E8F0;margin-bottom:6px}
+.form-label span{color:#FCA5A5}
+.form-control{width:100%;padding:11px 14px;border:1.5px solid rgba(255,255,255,0.1);border-radius:9px;font-size:.95rem;outline:none;transition:all .25s;font-family:inherit;color:#E2E8F0;background:rgba(255,255,255,0.04)}
+.form-control:focus{border-color:#6D5DF6;box-shadow:0 0 0 3px rgba(109,93,246,0.15)}
+.form-control::placeholder{color:var(--muted)}
+.pw-wrap{position:relative}
+.pw-wrap .form-control{padding-right:44px}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted)}
+.strength-wrap{margin-top:6px}
+.strength-bar{height:4px;border-radius:99px;background:rgba(255,255,255,0.08);overflow:hidden;margin-bottom:4px}
+.strength-fill{height:100%;width:0%;border-radius:99px;transition:width .3s,background .3s}
+.strength-label{font-size:.75rem;color:var(--muted)}
+.hint{font-size:.75rem;color:var(--muted);margin-top:4px}
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#6D5DF6,#A855F7);color:white;border:none;border-radius:9px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;margin-top:6px;box-shadow:0 4px 20px rgba(109,93,246,0.35)}
+.btn-primary:hover{box-shadow:0 6px 30px rgba(109,93,246,0.55);transform:translateY(-2px)}
+.btn-primary:disabled{opacity:.65;cursor:not-allowed;transform:none}
+.error-box{display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;margin-bottom:14px;color:#FCA5A5;font-size:.875rem}
+.success-box{display:none;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:16px;color:#4ADE80;font-size:.875rem;margin-bottom:14px;text-align:center}
+.links{text-align:center;margin-top:20px;font-size:.85rem;color:var(--muted)}
+.links a{color:#A78BFA;font-weight:600;text-decoration:none;transition:color .2s}
+.links a:hover{color:#C4B5FD}
+.spinner{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.2);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.countdown{font-size:1.1rem;font-weight:700;color:#4ADE80;margin-top:8px}
+.divider{display:flex;align-items:center;gap:12px;margin:8px 0 16px;color:var(--muted);font-size:.8rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08)}
+@media(max-width:768px){body{grid-template-columns:1fr}.left{display:none}.right{background:#0B1120;padding:24px}}
+</style>
+</head>
+<body>
+<div class="left">
+  <h1>🎓 RPA Smart Attendance</h1>
+  <p>Create a new administrator account to manage your institution's attendance system.</p>
+  <div class="feature"><div class="f-icon">🏫</div><div class="f-text">Full control over departments, classes & subjects</div></div>
+  <div class="feature"><div class="f-icon">👨‍🏫</div><div class="f-text">Manage teachers and student records</div></div>
+  <div class="feature"><div class="f-icon">📊</div><div class="f-text">View reports and attendance analytics</div></div>
+  <div class="feature"><div class="f-icon">🔔</div><div class="f-text">Automated parent email notifications</div></div>
+</div>
+
+<div class="right">
+  <div class="card">
+    <div class="role-badge">🔐 Admin Registration</div>
+    <h2>Create Admin Account</h2>
+    <p class="subtitle">Set up a new administrator for your institution</p>
+
+    <div class="step-indicator">
+      <div class="step active" id="step1bar"></div>
+      <div class="step" id="step2bar"></div>
+    </div>
+
+    <div id="errorBox" class="error-box"></div>
+    <div id="successBox" class="success-box"></div>
+
+    <!-- Step 1: Basic Info -->
+    <div id="step1">
+      <div class="form-group">
+        <label class="form-label">Full Name <span>*</span></label>
+        <input type="text" class="form-control" id="fullName" placeholder="e.g. Dr. Rajesh Kumar" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username <span>*</span></label>
+        <input type="text" class="form-control" id="username" placeholder="e.g. admin_rajesh" autocomplete="username">
+        <div class="hint">Used for login. Lowercase letters, numbers and underscores only.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address <span>*</span></label>
+        <input type="email" class="form-control" id="email" placeholder="admin@college.edu" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" class="form-control" id="phone" placeholder="+91 98765 43210" autocomplete="tel">
+      </div>
+      <button class="btn-primary" id="step1Btn" onclick="goToStep2()">Continue →</button>
+    </div>
+
+    <!-- Step 2: Password -->
+    <div id="step2" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Password <span>*</span></label>
+        <div class="pw-wrap">
+          <input type="password" class="form-control" id="password" placeholder="Min 8 characters" oninput="checkStrength(this.value)" onkeydown="if(event.key==='Enter')doRegister()">
+          <button class="toggle-pw" onclick="togglePw('password',this)">👁</button>
+        </div>
+        <div class="strength-wrap">
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          <span class="strength-label" id="strengthLabel"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password <span>*</span></label>
+        <div class="pw-wrap">
+          <input type="password" class="form-control" id="confirmPassword" placeholder="Re-enter your password" onkeydown="if(event.key==='Enter')doRegister()">
+          <button class="toggle-pw" onclick="togglePw('confirmPassword',this)">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Secret Registration Key <span>*</span></label>
+        <div class="pw-wrap">
+          <input type="password" class="form-control" id="regKey" placeholder="Enter the admin registration key" onkeydown="if(event.key==='Enter')doRegister()">
+          <button class="toggle-pw" onclick="togglePw('regKey',this)">👁</button>
+        </div>
+        <div class="hint">Contact your system administrator for this key.</div>
+      </div>
+      <button class="btn-primary" id="registerBtn" onclick="doRegister()">Create Admin Account ✓</button>
+      <div style="text-align:center;margin-top:12px">
+        <a href="#" onclick="goBack();return false;" style="font-size:.82rem;color:#A78BFA">← Back to details</a>
+      </div>
+    </div>
+
+    <div class="links">
+      Already have an account? <a href="/login/">Login here</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function getCookie(n){const v=`; ${document.cookie}`,p=v.split(`; ${n}=`);if(p.length===2)return p.pop().split(';').shift();return '';}
+function showError(msg){const b=document.getElementById('errorBox');b.innerHTML=msg;b.style.display='block';document.getElementById('successBox').style.display='none';}
+function hideError(){document.getElementById('errorBox').style.display='none';}
+function togglePw(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
+
+function checkStrength(pw){
+  const fill=document.getElementById('strengthFill');
+  const label=document.getElementById('strengthLabel');
+  if(!pw){fill.style.width='0%';label.textContent='';return;}
+  let score=0;
+  if(pw.length>=8) score++;
+  if(pw.length>=12) score++;
+  if(/[A-Z]/.test(pw)&&/[a-z]/.test(pw)) score++;
+  if(/[0-9]/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+  const levels=[
+    {w:'20%',bg:'#EF4444',txt:'Weak'},
+    {w:'40%',bg:'#F59E0B',txt:'Fair'},
+    {w:'65%',bg:'#6D5DF6',txt:'Good'},
+    {w:'85%',bg:'#22C55E',txt:'Strong'},
+    {w:'100%',bg:'#16A34A',txt:'Very Strong'},
+  ];
+  const l=levels[Math.min(score,4)];
+  fill.style.width=l.w; fill.style.background=l.bg;
+  label.textContent=l.txt; label.style.color=l.bg;
+}
+
+function goToStep2(){
+  hideError();
+  const name=document.getElementById('fullName').value.trim();
+  const username=document.getElementById('username').value.trim();
+  const email=document.getElementById('email').value.trim();
+  if(!name){showError('Full name is required');return;}
+  if(!username){showError('Username is required');return;}
+  if(!/^[a-zA-Z0-9_]+$/.test(username)){showError('Username can only contain letters, numbers and underscores');return;}
+  if(!email){showError('Email address is required');return;}
+  if(!/\S+@\S+\.\S+/.test(email)){showError('Please enter a valid email address');return;}
+  document.getElementById('step1').style.display='none';
+  document.getElementById('step2').style.display='block';
+  document.getElementById('step1bar').classList.remove('active');
+  document.getElementById('step1bar').classList.add('done');
+  document.getElementById('step2bar').classList.add('active');
+  setTimeout(()=>document.getElementById('password').focus(),100);
+}
+
+function goBack(){
+  hideError();
+  document.getElementById('step2').style.display='none';
+  document.getElementById('step1').style.display='block';
+  document.getElementById('step1bar').classList.add('active');
+  document.getElementById('step1bar').classList.remove('done');
+  document.getElementById('step2bar').classList.remove('active');
+}
+
+async function doRegister(){
+  hideError();
+  const name=document.getElementById('fullName').value.trim();
+  const username=document.getElementById('username').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const phone=document.getElementById('phone').value.trim();
+  const password=document.getElementById('password').value;
+  const confirmPassword=document.getElementById('confirmPassword').value;
+  const regKey=document.getElementById('regKey').value.trim();
+
+  if(!password){showError('Password is required');return;}
+  if(password.length<8){showError('Password must be at least 8 characters');return;}
+  if(password!==confirmPassword){showError('Passwords do not match');return;}
+  if(!regKey){showError('Registration key is required');return;}
+
+  const btn=document.getElementById('registerBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Creating account...';
+
+  try{
+    const res=await fetch('/api/auth/admin-register/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+      body:JSON.stringify({name,username,email,phone,password,confirm_password:confirmPassword,registration_key:regKey})
+    });
+    const data=await res.json();
+    if(!res.ok){
+      showError(data.error||'Registration failed. Please try again.');
+    } else {
+      document.getElementById('step2').style.display='none';
+      document.getElementById('step2bar').classList.remove('active');
+      document.getElementById('step2bar').classList.add('done');
+      const sb=document.getElementById('successBox');
+      sb.style.display='block';
+      let count=3;
+      sb.innerHTML=`✅ Admin account created successfully!<br><span class="countdown" id="cdNum">Redirecting to login in ${count}...</span>`;
+      const iv=setInterval(()=>{
+        count--;
+        if(count<=0){clearInterval(iv);window.location.href='/login/';}
+        else document.getElementById('cdNum').textContent=`Redirecting to login in ${count}...`;
+      },1000);
+    }
+  }catch(e){showError('Connection error. Please try again.');}
+  finally{btn.disabled=false;btn.innerHTML='Create Admin Account ✓';}
+}
+</script>
+</body>
+</html>

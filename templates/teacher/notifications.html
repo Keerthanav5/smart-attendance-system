@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% block title %}Send Notifications — RPA Smart Attendance System{% endblock %}
+{% block page_title %}Send Notifications{% endblock %}
+{% block sidebar_links %}
+<div class="nav-section">Teacher Portal</div>
+<a class="nav-link" href="/teacher/dashboard/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<a class="nav-link" href="/teacher/mark-attendance/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg> Mark Attendance</a>
+<a class="nav-link" href="/teacher/edit-attendance/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg> Edit Attendance</a>
+<a class="nav-link" href="/teacher/attendance-percentage/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Attendance Percentage</a>
+<a class="nav-link" href="/teacher/timetable/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Timetable</a>
+<a class="nav-link" href="/teacher/notifications/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Notifications</a>
+<a class="nav-link" href="/teacher/students/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg> Students View</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.date-bar{display:flex;gap:12px;align-items:flex-end;margin-bottom:24px;flex-wrap:wrap}
+.subject-card{border:2px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;transition:border-color .2s}
+.subject-card.selected{border-color:var(--primary)}
+.subject-card-header{padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;background:rgba(255,255,255,0.04);transition:all .2s}
+.subject-card-header:hover{background:rgba(109,93,246,0.08)}
+.subject-card.selected .subject-card-header{background:rgba(109,93,246,0.12)}
+.subj-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.subject-card.selected .subj-check{background:var(--primary);border-color:var(--primary);color:white;box-shadow:0 0 8px rgba(109,93,246,0.3)}
+.subj-info{flex:1}
+.subj-title{font-weight:700;font-size:.95rem}
+.subj-meta{font-size:.78rem;color:var(--muted)}
+.subj-badge{font-size:.82rem;font-weight:700;padding:4px 12px;border-radius:99px;background:var(--danger-light);color:var(--danger)}
+.student-mini-list{background:var(--card);border-top:1px solid var(--border)}
+.student-mini-row{display:flex;align-items:center;gap:10px;padding:10px 18px 10px 50px;border-bottom:1px solid var(--border);font-size:.85rem}
+.student-mini-row:last-child{border-bottom:none}
+.sml-name{flex:1;font-weight:600}
+.sml-id{color:var(--muted);font-size:.78rem}
+.sml-email{color:var(--muted);font-size:.78rem}
+.sml-no-email{color:var(--danger);font-size:.78rem;font-style:italic}
+.result-table{font-size:.82rem}
+.result-table td{padding:8px 12px;border-bottom:1px solid var(--border)}
+.sticky-footer{position:sticky;bottom:0;background:rgba(17,24,39,0.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:16px 24px;margin:0 -20px;display:flex;justify-content:space-between;align-items:center;z-index:10}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="page-header">
+    <h1>Send Notifications</h1>
+    <span style="font-size:.85rem;color:var(--muted)">Send parent absence alerts by subject & date</span>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps" style="margin-bottom:24px">
+    <div class="step-item active" id="si1"><div class="sc" id="sc1">1</div><div class="sl">Department</div></div>
+    <div class="step-item" id="si2"><div class="sc" id="sc2">2</div><div class="sl">Class</div></div>
+    <div class="step-item" id="si3"><div class="sc" id="sc3">3</div><div class="sl">Notify</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header">
+      <div>
+        <h3 id="stepTitle">Select Department</h3>
+        <div style="font-size:.8rem;color:var(--muted)" id="stepSub">Select a department to continue</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <input class="form-control" type="date" id="dateInput" style="width:160px">
+        <button class="btn btn-secondary btn-sm" id="resetBtn" style="display:none" onclick="resetAll()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- STEP 1 -->
+      <div id="deptGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;"></div>
+      
+      <!-- STEP 2 -->
+      <div id="classGrid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;"></div>
+      
+      <!-- STEP 3 -->
+      <div id="notifySection" style="display:none;">
+        <div style="text-align:center;padding:30px 20px;">
+          <div style="font-size:3rem;margin-bottom:16px">📬</div>
+          <h3 style="margin-bottom:8px">Ready to Send Notifications</h3>
+          <p style="color:var(--muted);margin-bottom:24px">Notifications will be sent to all parents of absent students in this class.<br>Note: Attendance for all subjects must be marked first.</p>
+          <button class="btn btn-primary" id="sendBtn" onclick="sendNotifications()" style="padding:12px 36px;font-size:1.05rem">
+            📧 Send Notifications to Parents
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results card (shown after sending) -->
+  <div id="resultsCard" style="display:none;margin-top:20px">
+    <div class="card">
+      <div class="card-header">
+        <h3 id="resultsTitle">Notification Results</h3>
+        <div id="resultsSummary"></div>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div class="table-wrap">
+          <table class="result-table">
+            <thead><tr><th>Student</th><th>Subjects</th><th>Parent Email</th><th>Status</th><th>Detail</th></tr></thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log card -->
+  <div class="card" style="margin-top:24px">
+    <div class="card-header">
+      <h3>📋 Notification Log — Today</h3>
+      <button class="btn btn-secondary btn-sm" onclick="loadLog()">↺ Refresh</button>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Student</th><th>Subject</th><th>Parent Email</th><th>Date</th><th>Status</th><th>Time</th></tr></thead>
+          <tbody id="logBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.sel-card{border:2px solid var(--border);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:all .25s;background:rgba(255,255,255,0.04)}
+.sel-card:hover{border-color:rgba(109,93,246,0.4);background:rgba(109,93,246,0.06);transform:translateY(-4px);box-shadow:0 4px 20px rgba(109,93,246,0.15)}
+.step-item{flex:1;display:flex;align-items:center;gap:12px;padding:12px;border-bottom:3px solid var(--border);color:var(--muted);font-weight:600}
+.step-item.active{border-color:var(--primary);color:var(--text)}
+.step-item.done{border-color:var(--success);color:var(--success)}
+.sc{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.1);color:white;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.active .sc{background:var(--primary);box-shadow:0 0 8px rgba(109,93,246,0.3)}
+.done .sc{background:var(--success)}
+.result-table{font-size:.82rem}
+.result-table td{padding:8px 12px;border-bottom:1px solid var(--border)}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCookie(n){const v=`; ${document.cookie}`,p=v.split(`; ${n}=`);if(p.length===2)return p.pop().split(';').shift();return '';}
+
+const token = localStorage.getItem('teacher_token')||'';
+if(!token) window.location.href='/teacher/login/';
+
+// Setup UI
+document.getElementById('userAvatar').textContent=(localStorage.getItem('teacher_name')||'T').charAt(0).toUpperCase();
+document.getElementById('userName').textContent=localStorage.getItem('teacher_name')||'Teacher';
+document.getElementById('userRole').textContent='Teacher';
+
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('dateInput').value = today;
+document.getElementById('dateInput').max   = today;
+
+let deptId = null, classId = null, className = '';
+
+async function init(){
+  loadLog();
+  loadDepartments();
+}
+
+function setStep(step){
+  document.getElementById('si1').className = 'step-item' + (step>1?' done':(step===1?' active':''));
+  document.getElementById('si2').className = 'step-item' + (step>2?' done':(step===2?' active':''));
+  document.getElementById('si3').className = 'step-item' + (step===3?' active':'');
+  
+  document.getElementById('sc1').textContent = step>1 ? '✓' : '1';
+  document.getElementById('sc2').textContent = step>2 ? '✓' : '2';
+  
+  document.getElementById('deptGrid').style.display = step===1 ? 'grid' : 'none';
+  document.getElementById('classGrid').style.display = step===2 ? 'grid' : 'none';
+  document.getElementById('notifySection').style.display = step===3 ? 'block' : 'none';
+  
+  document.getElementById('resetBtn').style.display = step>1 ? 'block' : 'none';
+  
+  if(step===1) {
+    document.getElementById('stepTitle').textContent = 'Select Department';
+    document.getElementById('stepSub').textContent = 'Select a department to continue';
+  }
+}
+
+function resetAll(){
+  deptId = null; classId = null; className = '';
+  document.getElementById('resultsCard').style.display = 'none';
+  setStep(1);
+}
+
+function esc(s){ return String(s).replace(/'/g,"\\'"); }
+
+async function loadDepartments(){
+  const grid = document.getElementById('deptGrid');
+  grid.innerHTML='<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:20px">Loading departments...</div>';
+  try{
+    const res = await fetch('/api/departments/', {headers:{'Authorization':'Bearer '+token}});
+    const data = await res.json();
+    grid.innerHTML = data.map(d=>`
+      <div class="sel-card" onclick="pickDept(${d.id}, '${esc(d.name)}')">
+        <div style="font-size:2.5rem;margin-bottom:12px">🏛️</div>
+        <h4>${d.name}</h4>
+      </div>
+    `).join('');
+  }catch(e){ grid.innerHTML='<div style="color:var(--danger)">Failed to load.</div>'; }
+}
+
+function pickDept(id, name){
+  deptId = id;
+  document.getElementById('stepTitle').textContent = `Department: ${name}`;
+  document.getElementById('stepSub').textContent = 'Select a class to continue';
+  setStep(2);
+  loadClasses();
+}
+
+async function loadClasses(){
+  const grid = document.getElementById('classGrid');
+  grid.innerHTML='<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:20px">Loading classes...</div>';
+  try{
+    const res = await fetch(`/api/classes/by-department/${deptId}/`, {headers:{'Authorization':'Bearer '+token}});
+    const data = await res.json();
+    if(!data.length){
+      grid.innerHTML='<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:20px">No classes found in this department.</div>';
+      return;
+    }
+    grid.innerHTML = data.map(c=>`
+      <div class="sel-card" onclick="pickClass(${c.id}, '${esc(c.name)}')">
+        <div style="font-size:2.5rem;margin-bottom:12px">📂</div>
+        <h4>${c.name}</h4>
+      </div>
+    `).join('');
+  }catch(e){ grid.innerHTML='<div style="color:var(--danger)">Failed to load.</div>'; }
+}
+
+function pickClass(id, name){
+  classId = id; className = name;
+  document.getElementById('stepTitle').textContent = `Class: ${name}`;
+  document.getElementById('stepSub').textContent = 'Ready to send notifications';
+  setStep(3);
+}
+
+/* ── Send notifications ── */
+let forceSend = false;
+async function sendNotifications(){
+  const date = document.getElementById('dateInput').value;
+  const btn  = document.getElementById('sendBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Sending...';
+
+  try{
+    const res = await fetch('/api/notifications/send-class-alerts/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+token,'X-CSRFToken':getCookie('csrftoken')},
+      body: JSON.stringify({ date, class_id: classId, force: forceSend }),
+    });
+    const data = await res.json();
+
+    if(res.ok){
+      showToast(data.message || 'Notifications sent!', 'success');
+      renderResults(data);
+      loadLog();
+      btn.style.background = '';
+      forceSend = false;
+    } else {
+      if(data.needs_force){
+        showToast("⚠️ " + data.error + " Click again to overwrite.", "warning");
+        btn.textContent = "⚠️ Re-send Notifications (Overwrite)";
+        btn.style.background = "#DC2626"; // red
+        forceSend = true;
+      } else {
+        showToast(data.error || 'Failed to send', 'error');
+        btn.textContent = '📧 Send Notifications to Parents';
+        btn.style.background = '';
+        forceSend = false;
+      }
+    }
+  }catch(e){
+    showToast('Connection error','error');
+  }
+
+  if(forceSend === false) {
+    btn.disabled = false;
+    btn.innerHTML = '📧 Send Notifications to Parents';
+  } else {
+    btn.disabled = false;
+  }
+}
+
+function renderResults(data){
+  const card = document.getElementById('resultsCard');
+  card.style.display = 'block';
+  document.getElementById('resultsSummary').innerHTML = `
+    <span class="badge badge-success">✅ ${data.sent} sent</span>&nbsp;
+    <span class="badge badge-danger">❌ ${data.failed} failed</span>&nbsp;
+    <span class="badge badge-warning">⏭ ${data.skipped} skipped</span>`;
+
+  const tbody = document.getElementById('resultsBody');
+  tbody.innerHTML = (data.details || []).map(d => {
+    const statusBadge = d.status === 'sent'
+      ? '<span class="badge badge-success">Sent</span>'
+      : d.status === 'skipped'
+      ? '<span class="badge badge-warning">Skipped</span>'
+      : '<span class="badge badge-danger">Failed</span>';
+    return `<tr>
+      <td><strong>${d.name||d.student}</strong></td>
+      <td>${d.subjects||'—'}</td>
+      <td style="font-size:.78rem">${d.parent_email||'—'}</td>
+      <td>${statusBadge}</td>
+      <td style="font-size:.78rem;color:var(--muted)">${d.error||d.reason||''}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted)">No details</td></tr>';
+
+  card.scrollIntoView({behavior:'smooth'});
+}
+
+/* ── Notification log ── */
+async function loadLog(){
+  const date = document.getElementById('dateInput').value || new Date().toISOString().split('T')[0];
+  try{
+    const r    = await fetch(`/api/notifications/?date=${date}`);
+    const logs = await r.json();
+    const tbody = document.getElementById('logBody');
+    if(!logs.length){
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No notifications sent on ${date}</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = logs.map(l => {
+      const badge = l.status === 'SENT'
+        ? '<span class="badge badge-success">Sent</span>'
+        : '<span class="badge badge-danger">Failed</span>';
+      return `<tr>
+        <td><strong>${l.student_name||l.student_id}</strong><br><span style="font-size:.75rem;color:var(--muted)">${l.student_id}</span></td>
+        <td>${l.subject}</td>
+        <td style="font-size:.78rem">${l.parent_email}</td>
+        <td>${l.date}</td>
+        <td>${badge}</td>
+        <td style="font-size:.78rem">${l.sent_at}</td>
+      </tr>`;
+    }).join('');
+  }catch(e){ /* silent */ }
+}
+
+/* Boot */
+init();
+</script>
+{% endblock %}

@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard — RPA Smart Attendance System{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+{% block sidebar_links %}
+<div class="nav-section">Student Portal</div>
+<a class="nav-link active" href="/student/dashboard/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<a class="nav-link" href="/student/attendance/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg> Attendance</a>
+<a class="nav-link" href="/student/attendance-percentage/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Attendance Percentage</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ─── Welcome Hero ─── */
+.s-hero{background:linear-gradient(135deg,#6D5DF6 0%,#A855F7 50%,#EC4899 100%);border-radius:16px;padding:28px 32px;color:white;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(109,93,246,0.3)}
+.s-hero::before{content:'';position:absolute;top:-50%;right:-20%;width:300px;height:300px;background:radial-gradient(circle,rgba(255,255,255,0.08),transparent 70%);border-radius:50%}
+.s-hero::after{content:'';position:absolute;bottom:-30%;left:-10%;width:200px;height:200px;background:radial-gradient(circle,rgba(255,255,255,0.06),transparent 70%);border-radius:50%}
+.s-hero-content{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.s-hero h2{font-size:1.5rem;font-weight:800;margin:0 0 4px}
+.s-hero p{opacity:.85;font-size:.88rem;margin:0}
+.s-hero-stats{display:flex;gap:14px}
+.s-hero-stat{background:rgba(255,255,255,0.15);backdrop-filter:blur(12px);border-radius:12px;padding:12px 18px;text-align:center;min-width:80px}
+.s-hero-stat .stat-val{font-size:1.3rem;font-weight:800;line-height:1}
+.s-hero-stat .stat-lbl{font-size:.68rem;opacity:.85;margin-top:2px;font-weight:500}
+
+/* ─── Alert Banner ─── */
+.s-alert{border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:.85rem;font-weight:600;animation:alertPulse 2s ease-in-out infinite}
+.s-alert.danger{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#FCA5A5}
+.s-alert.safe{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:#86EFAC}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.85}}
+
+/* ─── Attendance Ring (Large) ─── */
+.att-ring{display:flex;align-items:center;justify-content:center;padding:20px 0}
+.ring-wrap{position:relative;width:180px;height:180px}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-size:2.4rem;font-weight:900;line-height:1}
+.ring-label{font-size:.72rem;color:var(--muted);font-weight:500;margin-top:4px}
+.ring-needed{font-size:.68rem;color:#D97706;margin-top:6px;font-weight:600;text-align:center}
+
+/* ─── Stat Trio ─── */
+.stat-trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px}
+.stat-trio-item{border-radius:10px;padding:14px;text-align:center}
+.stat-trio-item .trio-val{font-size:1.5rem;font-weight:800;line-height:1}
+.stat-trio-item .trio-lbl{font-size:.7rem;font-weight:600;margin-top:4px}
+
+/* ─── Subject Cards ─── */
+.subj-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:10px;transition:all .25s;position:relative;overflow:hidden}
+.subj-card:hover{border-color:rgba(109,93,246,0.3);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.15)}
+.subj-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.subj-card-name{font-weight:700;font-size:.92rem}
+.subj-card-code{font-size:.72rem;color:var(--muted);font-weight:500;margin-top:2px}
+.subj-card-badge{font-size:.65rem;font-weight:800;padding:4px 10px;border-radius:99px;letter-spacing:.5px}
+.subj-card-bar{height:8px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-bottom:10px}
+.subj-card-fill{height:100%;border-radius:99px;transition:width 1s ease}
+.subj-card-footer{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+.subj-card-pct{font-weight:800;font-size:1rem}
+
+/* ─── Recent Activity Timeline ─── */
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:8px;top:4px;bottom:4px;width:2px;background:linear-gradient(to bottom,rgba(109,93,246,0.4),rgba(109,93,246,0.05))}
+.tl-item{position:relative;margin-bottom:18px;animation:tlSlide .4s ease both}
+.tl-item::before{content:'';position:absolute;left:-22px;top:6px;width:10px;height:10px;border-radius:50%;border:2px solid var(--primary);background:var(--bg);z-index:1}
+@keyframes tlSlide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.tl-date{font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:4px}
+.tl-subjects{display:flex;flex-wrap:wrap;gap:6px}
+.tl-chip{font-size:.7rem;padding:4px 10px;border-radius:8px;font-weight:600}
+.tl-chip.present{background:rgba(34,197,94,0.1);color:#22C55E;border:1px solid rgba(34,197,94,0.2)}
+.tl-chip.absent{background:rgba(239,68,68,0.1);color:#EF4444;border:1px solid rgba(239,68,68,0.2)}
+
+/* ─── Calendar ─── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.cal-header{text-align:center;font-size:.68rem;font-weight:700;color:var(--muted);padding:6px 2px}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;cursor:default;transition:transform .15s}
+.cal-day:hover{transform:scale(1.1)}
+.cal-present{background:rgba(34,197,94,0.15);color:#22C55E}
+.cal-absent{background:rgba(239,68,68,0.12);color:#EF4444}
+.cal-holiday{background:rgba(245,158,11,0.12);color:#F59E0B}
+.cal-no-class{background:rgba(255,255,255,0.03);color:var(--muted)}
+.cal-empty{background:transparent}
+.cal-nav{display:flex;align-items:center;gap:8px}
+.cal-nav button{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;padding:4px 12px;cursor:pointer;font-size:.85rem;color:var(--text);transition:all .2s}
+.cal-nav button:hover{border-color:rgba(109,93,246,0.4);background:rgba(109,93,246,0.1)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:.72rem}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* ─── Streaks & Insights ─── */
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.insight-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;transition:all .25s}
+.insight-card:hover{border-color:rgba(109,93,246,0.2);transform:translateY(-2px)}
+.insight-icon{font-size:1.6rem;margin-bottom:8px}
+.insight-val{font-size:1.2rem;font-weight:800;margin-bottom:2px}
+.insight-lbl{font-size:.7rem;color:var(--muted);font-weight:500}
+
+/* ─── Responsive ─── */
+@media(max-width:768px){
+  .s-hero-content{flex-direction:column;text-align:center}
+  .s-hero-stats{justify-content:center}
+  .main-grid{grid-template-columns:1fr!important}
+  .insight-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <!-- Welcome Hero -->
+  <div class="s-hero">
+    <div class="s-hero-content">
+      <div>
+        <h2 id="welcomeText">Loading...</h2>
+        <p id="welcomeSub"></p>
+      </div>
+      <div class="s-hero-stats">
+        <div class="s-hero-stat">
+          <div class="stat-val" id="heroPresent">—</div>
+          <div class="stat-lbl">Present</div>
+        </div>
+        <div class="s-hero-stat">
+          <div class="stat-val" id="heroAbsent">—</div>
+          <div class="stat-lbl">Absent</div>
+        </div>
+        <div class="s-hero-stat">
+          <div class="stat-val" id="heroPct">—</div>
+          <div class="stat-lbl">Overall</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Banner -->
+  <div class="s-alert" id="alertBanner" style="display:none">
+    <span id="alertIcon"></span>
+    <span id="alertText"></span>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+    <!-- Left: Overall Ring + Insights -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <!-- Attendance Ring Card -->
+      <div class="card">
+        <div class="card-header"><h3>📊 Overall Attendance</h3></div>
+        <div class="card-body">
+          <div class="att-ring">
+            <div class="ring-wrap">
+              <svg width="180" height="180" viewBox="0 0 180 180">
+                <defs>
+                  <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#6D5DF6"/>
+                    <stop offset="100%" stop-color="#22C55E"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="90" cy="90" r="72" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>
+                <circle cx="90" cy="90" r="72" fill="none" id="ringCircle"
+                  stroke="url(#ringGrad)" stroke-width="12"
+                  stroke-dasharray="452" stroke-dashoffset="452"
+                  stroke-linecap="round" style="transition:stroke-dashoffset 1.2s ease"/>
+              </svg>
+              <div class="ring-center">
+                <div class="ring-pct" id="ringPct">0%</div>
+                <div class="ring-label">Attendance</div>
+                <div class="ring-needed" id="ringNeeded" style="display:none"></div>
+              </div>
+            </div>
+          </div>
+          <div class="stat-trio">
+            <div class="stat-trio-item" style="background:rgba(34,197,94,0.08)">
+              <div class="trio-val" style="color:#22C55E" id="presentStat">0</div>
+              <div class="trio-lbl" style="color:#22C55E">Present</div>
+            </div>
+            <div class="stat-trio-item" style="background:rgba(239,68,68,0.08)">
+              <div class="trio-val" style="color:#EF4444" id="absentStat">0</div>
+              <div class="trio-lbl" style="color:#EF4444">Absent</div>
+            </div>
+            <div class="stat-trio-item" style="background:rgba(109,93,246,0.08)">
+              <div class="trio-val" style="color:#A78BFA" id="totalStat">0</div>
+              <div class="trio-lbl" style="color:#A78BFA">Total</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights & Streaks -->
+      <div class="card">
+        <div class="card-header"><h3>💡 Insights</h3></div>
+        <div class="card-body">
+          <div class="insight-grid" id="insightGrid">
+            <div class="insight-card"><div class="insight-icon">⏳</div><div class="insight-val">—</div><div class="insight-lbl">Loading...</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Calendar + Recent Activity -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <!-- Calendar -->
+      <div class="card">
+        <div class="card-header">
+          <h3>📅 Calendar</h3>
+          <div class="cal-nav">
+            <button onclick="prevMonth()">‹</button>
+            <span id="calMonthLabel" style="font-size:.82rem;font-weight:700;min-width:90px;text-align:center"></span>
+            <button onclick="nextMonth()">›</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding-top:4px">
+          <div class="cal-grid" id="calGrid">
+            <div class="cal-header">Sun</div><div class="cal-header">Mon</div><div class="cal-header">Tue</div>
+            <div class="cal-header">Wed</div><div class="cal-header">Thu</div><div class="cal-header">Fri</div><div class="cal-header">Sat</div>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:rgba(34,197,94,0.2)"></div>Present</div>
+            <div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,0.15)"></div>Absent</div>
+            <div class="legend-item"><div class="legend-dot" style="background:rgba(245,158,11,0.15)"></div>Holiday</div>
+            <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.06)"></div>No class</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-header"><h3>🕐 Recent Activity</h3><span style="font-size:.72rem;color:var(--muted)">Last 7 days</span></div>
+        <div class="card-body" id="recentActivity" style="max-height:280px;overflow-y:auto">
+          <div style="text-align:center;color:var(--muted);padding:24px">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subject Breakdown (Full Width) -->
+  <div class="card">
+    <div class="card-header">
+      <h3>📚 Subject-wise Breakdown</h3>
+      <span style="font-size:.72rem;color:var(--muted);padding:4px 12px;border-radius:99px;background:rgba(109,93,246,0.1);font-weight:700" id="subjCount">0 subjects</span>
+    </div>
+    <div class="card-body" id="subjectBreakdown">
+      <div style="text-align:center;color:var(--muted);padding:24px">Loading...</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const token=localStorage.getItem('student_token')||'';
+if(!token){window.location.href='/student/login/';}
+const authHeaders={'Authorization':'Bearer '+token};
+
+let calMonth=new Date().getMonth()+1;
+let calYear=new Date().getFullYear();
+let dashData=null;
+
+async function loadDashboard(){
+  document.getElementById('userName').textContent=localStorage.getItem('student_name')||'Student';
+  document.getElementById('userRole').textContent='Reg: '+(localStorage.getItem('student_id')||'');
+  document.getElementById('userAvatar').textContent=(localStorage.getItem('student_name')||'S').charAt(0).toUpperCase();
+
+  try{
+    const res=await fetch('/api/student/dashboard/',{headers:authHeaders});
+    if(res.status===401){localStorage.clear();window.location.href='/student/login/';return;}
+    const d=await res.json();
+    dashData=d;
+
+    // Welcome Hero
+    const hour=new Date().getHours();
+    const greet=hour<12?'Good Morning ☀️':hour<17?'Good Afternoon 🌤️':'Good Evening 🌙';
+    document.getElementById('welcomeText').textContent=`${greet} ${d.name||'Student'}`;
+    document.getElementById('welcomeSub').textContent=`${d.student_id} · ${d.class_name||''} · ${d.department||''}`;
+    document.getElementById('userAvatar').textContent=(d.name||'S').charAt(0).toUpperCase();
+    document.getElementById('userName').textContent=d.name||'Student';
+    document.getElementById('userRole').textContent=`Reg: ${d.student_id}`;
+
+    // Hero Stats
+    document.getElementById('heroPresent').textContent=d.present_count||0;
+    document.getElementById('heroAbsent').textContent=d.absent_count||0;
+    document.getElementById('heroPct').textContent=(d.overall_percent||0)+'%';
+
+    // Attendance Ring
+    const pct=d.overall_percent||0;
+    const color=pct>=75?'#22C55E':pct>=60?'#D97706':'#DC2626';
+    const circumference=2*Math.PI*72; // 452.39
+    const offset=circumference-(pct/100)*circumference;
+    const ring=document.getElementById('ringCircle');
+
+    // Dynamic gradient based on percentage
+    const grad=document.getElementById('ringGrad');
+    if(pct>=75){
+      grad.children[0].setAttribute('stop-color','#22C55E');
+      grad.children[1].setAttribute('stop-color','#10B981');
+    } else if(pct>=60){
+      grad.children[0].setAttribute('stop-color','#F59E0B');
+      grad.children[1].setAttribute('stop-color','#D97706');
+    } else {
+      grad.children[0].setAttribute('stop-color','#EF4444');
+      grad.children[1].setAttribute('stop-color','#DC2626');
+    }
+    setTimeout(()=>ring.style.strokeDashoffset=offset,200);
+    document.getElementById('ringPct').textContent=pct+'%';
+    document.getElementById('ringPct').style.color=color;
+    document.getElementById('presentStat').textContent=d.present_count||0;
+    document.getElementById('absentStat').textContent=d.absent_count||0;
+    document.getElementById('totalStat').textContent=d.total_classes||0;
+
+    // Needed classes
+    if(d.classes_needed_for_75>0){
+      const n=document.getElementById('ringNeeded');
+      n.style.display='block';
+      n.textContent=`Need ${d.classes_needed_for_75} more to reach 75%`;
+    }
+
+    // Alert Banner
+    const banner=document.getElementById('alertBanner');
+    if(pct<75 && d.total_classes>0){
+      banner.className='s-alert danger';
+      banner.style.display='flex';
+      document.getElementById('alertIcon').textContent='⚠️';
+      document.getElementById('alertText').textContent=`Your attendance is ${pct}%. You need ${d.classes_needed_for_75||0} more consecutive classes to reach 75%.`;
+    } else if(d.total_classes>0){
+      banner.className='s-alert safe';
+      banner.style.display='flex';
+      document.getElementById('alertIcon').textContent='✅';
+      document.getElementById('alertText').textContent=`Great job! Your attendance is ${pct}%. Keep it up!`;
+    }
+
+    // Insights
+    renderInsights(d);
+
+    // Recent Activity
+    renderRecentActivity(d.recent_7_days||[]);
+
+    // Subjects
+    renderSubjects(d.subject_breakdown||[]);
+  }catch(e){console.error(e);}
+}
+
+function renderInsights(d){
+  const pct=d.overall_percent||0;
+  const total=d.total_classes||0;
+  const present=d.present_count||0;
+  const absent=d.absent_count||0;
+  const subjects=d.subject_breakdown||[];
+
+  // Calculate streak from recent_7_days
+  let streak=0;
+  const recent=d.recent_7_days||[];
+  for(const day of recent){
+    const allPresent=day.subjects.every(s=>s.present);
+    if(allPresent) streak++;
+    else break;
+  }
+
+  // Best and worst subject
+  const best=subjects.length>0?subjects[subjects.length-1]:null;
+  const worst=subjects.length>0?subjects[0]:null;
+
+  // Attendance rate change (simple calculation)
+  const safeCount=subjects.filter(s=>s.percent>=75).length;
+
+  const insights=[
+    {icon:'🔥',val:streak+' days',lbl:'Current Streak',color:'#F59E0B'},
+    {icon:'📈',val:safeCount+'/'+subjects.length,lbl:'Subjects Safe',color:'#22C55E'},
+    {icon:'⭐',val:best?best.percent+'%':'—',lbl:best?'Best: '+best.subject:'Best Subject',color:'#6D5DF6'},
+    {icon:'🎯',val:worst?worst.percent+'%':'—',lbl:worst?'Focus: '+worst.subject:'Needs Focus',color:worst&&worst.percent<75?'#EF4444':'#22C55E'},
+  ];
+
+  document.getElementById('insightGrid').innerHTML=insights.map(i=>`
+    <div class="insight-card">
+      <div class="insight-icon">${i.icon}</div>
+      <div class="insight-val" style="color:${i.color}">${i.val}</div>
+      <div class="insight-lbl">${i.lbl}</div>
+    </div>
+  `).join('');
+}
+
+function renderRecentActivity(recent){
+  const div=document.getElementById('recentActivity');
+  if(!recent.length){
+    div.innerHTML='<div style="text-align:center;color:var(--muted);padding:24px"><div style="font-size:2rem;margin-bottom:8px;opacity:.4">📋</div>No recent activity</div>';
+    return;
+  }
+  div.innerHTML='<div class="timeline">'+recent.map((day,i)=>{
+    const dayName=new Date(day.date).toLocaleDateString('en-US',{weekday:'short'});
+    const presentCount=day.subjects.filter(s=>s.present).length;
+    const totalCount=day.subjects.length;
+    return `<div class="tl-item" style="animation-delay:${i*80}ms">
+      <div class="tl-date">${dayName}, ${day.date_label} · ${presentCount}/${totalCount} present</div>
+      <div class="tl-subjects">
+        ${day.subjects.map(s=>`<span class="tl-chip ${s.present?'present':'absent'}">${s.present?'✓':'✕'} ${s.name}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+function renderSubjects(subjects){
+  const div=document.getElementById('subjectBreakdown');
+  document.getElementById('subjCount').textContent=subjects.length+' subjects';
+  if(!subjects.length){
+    div.innerHTML='<div style="text-align:center;color:var(--muted);padding:24px"><div style="font-size:2rem;margin-bottom:8px;opacity:.4">📚</div>No attendance data yet</div>';
+    return;
+  }
+  div.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">'+subjects.map((s,i)=>{
+    const c=s.percent>=75?'#22C55E':s.percent>=60?'#D97706':'#DC2626';
+    const bg=s.percent>=75?'rgba(34,197,94,':'rgba(239,68,68,';
+    const statusLabel=s.percent>=75?'SAFE':s.percent>=60?'AT RISK':'DANGER';
+    const statusBg=s.percent>=75?'rgba(34,197,94,0.12)':s.percent>=60?'rgba(217,119,6,0.12)':'rgba(239,68,68,0.12)';
+    return `<div class="subj-card" style="animation:panelIn .4s ease ${i*60}ms both">
+      <div class="subj-card-top">
+        <div>
+          <div class="subj-card-name">${s.subject}</div>
+          <div class="subj-card-code">${s.code} · ${s.semester}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="subj-card-pct" style="color:${c}">${s.percent}%</div>
+          <span class="subj-card-badge" style="background:${statusBg};color:${c}">${statusLabel}</span>
+        </div>
+      </div>
+      <div class="subj-card-bar"><div class="subj-card-fill" style="width:${s.percent}%;background:${c}"></div></div>
+      <div class="subj-card-footer">
+        <span>✓ ${s.present} Present</span>
+        <span>✕ ${s.absent} Absent</span>
+        <span>${s.total} Total</span>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+// ─── Calendar ───
+async function loadCalendar(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthLabel').textContent=`${months[calMonth-1].slice(0,3)} ${calYear}`;
+  try{
+    const res=await fetch(`/api/student/calendar/?month=${calMonth}&year=${calYear}`,{headers:authHeaders});
+    const days=await res.json();
+    const firstDay=new Date(calYear,calMonth-1,1).getDay();
+    const grid=document.getElementById('calGrid');
+    const headers=grid.querySelectorAll('.cal-header');
+    grid.innerHTML='';
+    headers.forEach(h=>grid.appendChild(h));
+    for(let i=0;i<firstDay;i++){const e=document.createElement('div');e.className='cal-day cal-empty';grid.appendChild(e);}
+    days.forEach(d=>{
+      const el=document.createElement('div');
+      const cls={present:'cal-present',absent:'cal-absent',holiday:'cal-holiday',no_class:'cal-no-class'}[d.status]||'cal-no-class';
+      el.className=`cal-day ${cls}`;
+      el.textContent=d.day;
+      el.title=d.status.replace('_',' ');
+      grid.appendChild(el);
+    });
+  }catch(e){}
+}
+
+function prevMonth(){calMonth--;if(calMonth<1){calMonth=12;calYear--;}loadCalendar();}
+function nextMonth(){calMonth++;if(calMonth>12){calMonth=1;calYear++;}loadCalendar();}
+
+loadDashboard();
+loadCalendar();
+</script>
+{% endblock %}

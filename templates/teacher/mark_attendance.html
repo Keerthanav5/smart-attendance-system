@@ -1,0 +1,509 @@
+{% extends "base.html" %}
+{% block title %}Mark Attendance — RPA Smart Attendance System{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
+{% block sidebar_links %}
+<div class="nav-section">Teacher Portal</div>
+<a class="nav-link" href="/teacher/dashboard/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<a class="nav-link" href="/teacher/mark-attendance/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg> Mark Attendance</a>
+<a class="nav-link" href="/teacher/edit-attendance/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg> Edit Attendance</a>
+<a class="nav-link" href="/teacher/attendance-percentage/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Attendance Percentage</a>
+<a class="nav-link" href="/teacher/timetable/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Timetable</a>
+<a class="nav-link" href="/teacher/notifications/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Notifications</a>
+<a class="nav-link" href="/teacher/students/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg> Students View</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Step wizard */
+.steps{display:flex;margin-bottom:20px}
+.step-item{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+.step-item:not(:last-child)::after{content:'';position:absolute;top:17px;left:55%;width:90%;height:2px;background:var(--border);z-index:0}
+.step-item.done:not(:last-child)::after{background:var(--success)}
+.step-item.active:not(:last-child)::after{background:var(--primary)}
+.sc{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--border);background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;color:var(--muted);position:relative;z-index:1;transition:all .2s}
+.step-item.done .sc{background:var(--success);border-color:var(--success);color:white;box-shadow:0 0 12px rgba(34,197,94,0.3)}
+.step-item.active .sc{background:var(--primary);border-color:var(--primary);color:white;box-shadow:0 0 12px rgba(109,93,246,0.3)}
+.sl{font-size:.68rem;font-weight:600;color:var(--muted);margin-top:5px;text-align:center}
+.step-item.active .sl{color:var(--primary)} .step-item.done .sl{color:var(--success)}
+
+/* Selection cards */
+.pick-card{border:1.5px solid var(--border);border-radius:10px;padding:14px 18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.04);margin-bottom:8px}
+.pick-card:hover{border-color:rgba(109,93,246,0.4);background:rgba(109,93,246,0.06);box-shadow:0 0 15px rgba(109,93,246,0.1)}
+.pick-card .pc-label{flex:1;font-weight:700}
+.pick-card .pc-sub{font-size:.78rem;color:var(--muted);margin-top:2px}
+.pick-card svg{color:var(--muted)}
+
+/* Subject cards */
+.subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
+.subj-card{border:2px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .25s;background:rgba(255,255,255,0.04);position:relative}
+.subj-card:hover{border-color:rgba(109,93,246,0.4);box-shadow:0 4px 20px rgba(109,93,246,0.15)}
+.subj-card.marked{border-color:rgba(34,197,94,0.5);background:rgba(34,197,94,0.06);cursor:pointer}
+.subj-card .sn{font-weight:700;font-size:.92rem}
+.subj-card .sm{font-size:.75rem;color:var(--muted);margin-top:3px}
+.subj-card .ss{font-size:.75rem;font-weight:700;margin-top:10px;color:var(--muted);display:flex;gap:8px}
+.subj-card.marked .ss{color:var(--success)}
+.mb{position:absolute;top:9px;right:9px;background:#16A34A;color:white;border-radius:99px;font-size:.68rem;font-weight:700;padding:2px 8px;box-shadow:0 2px 8px rgba(34,197,94,0.3)}
+.notif-box{background:rgba(109,93,246,0.08);border:2px solid rgba(109,93,246,0.3);border-radius:var(--radius);padding:20px;margin-top:16px;display:none;text-align:center}
+.notif-box h4{color:var(--primary);margin-bottom:8px;font-size:1rem}
+.notif-box p{font-size:.82rem;color:var(--muted);margin-bottom:14px}
+
+/* Student row */
+.srow{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,0.06);transition:background .15s}
+.srow:last-child{border-bottom:none} .srow:hover{background:rgba(109,93,246,0.04)}
+.savatar{width:38px;height:38px;border-radius:50%;background:rgba(109,93,246,0.15);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:.85rem}
+.sname{flex:1}
+.sname .n{font-weight:600;font-size:.9rem}
+.sname .i{font-size:.76rem;color:var(--muted)}
+
+/* Toggle */
+.tog{padding:8px 20px;border:none;border-radius:7px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;min-width:105px}
+.tog:active{transform:scale(.96)}
+.tog.absent{background:rgba(239,68,68,0.15);color:#FCA5A5;box-shadow:0 0 0 2px rgba(239,68,68,0.2)}
+.tog.absent:hover{background:rgba(239,68,68,0.25)}
+.tog.present{background:rgba(34,197,94,0.15);color:#86EFAC;box-shadow:0 0 0 2px rgba(34,197,94,0.2)}
+.tog.present:hover{background:rgba(34,197,94,0.25)}
+
+.ctr{display:flex;gap:16px;padding:11px 16px;background:rgba(255,255,255,0.04);border-radius:8px;margin-bottom:12px;font-size:.85rem;font-weight:600}
+.c-p{color:var(--success)} .c-a{color:var(--danger)} .c-t{color:var(--muted)}
+.sticky-foot{position:sticky;bottom:0;background:rgba(17,24,39,0.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:13px 20px;margin:0 -20px;display:flex;justify-content:space-between;align-items:center;z-index:10}
+
+.tip{font-size:.78rem;color:var(--muted);padding:12px 0}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="page-header">
+    <h1>Mark Attendance</h1>
+    <input type="date" class="form-control" id="dateInput" style="width:160px">
+  </div>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step-item active" id="si1"><div class="sc" id="sc1">1</div><div class="sl">Department</div></div>
+    <div class="step-item" id="si2"><div class="sc" id="sc2">2</div><div class="sl">Class</div></div>
+    <div class="step-item" id="si3"><div class="sc" id="sc3">3</div><div class="sl">Semester</div></div>
+    <div class="step-item" id="si4"><div class="sc" id="sc4">4</div><div class="sl">Subjects</div></div>
+    <div class="step-item" id="si5"><div class="sc" id="sc5">5</div><div class="sl">Students</div></div>
+  </div>
+
+  <!-- STEP 1: Departments -->
+  <div id="step1">
+    <div class="card">
+      <div class="card-header"><h3>🏛️ Select Department</h3></div>
+      <div class="card-body" id="deptList"><div class="tip" style="text-align:center;padding:24px">Loading departments...</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Classes -->
+  <div id="step2" style="display:none">
+    <div class="card">
+      <div class="card-header"><h3>📂 Select Class</h3><button class="btn btn-secondary btn-sm" onclick="goBack(1)">← Back</button></div>
+      <div class="card-body" id="classList"></div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Semesters -->
+  <div id="step3" style="display:none">
+    <div class="card">
+      <div class="card-header"><h3><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Select Semester</h3><button class="btn btn-secondary btn-sm" onclick="goBack(2)">← Back</button></div>
+      <div class="card-body" id="semesterList"></div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Subjects (timetable-based) -->
+  <div id="step4" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3 id="step4Title"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Today's Subjects</h3>
+          <div style="font-size:.78rem;color:var(--muted)" id="step4Sub"></div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="goBack(3)">← Back</button>
+      </div>
+      <div class="card-body">
+        <div class="tip">🟢 Green = attendance already saved &nbsp;|&nbsp; Click any subject to mark or edit (today only) &nbsp;|&nbsp; Based on the weekly timetable</div>
+        <div class="subj-grid" id="subjectGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5: Students -->
+  <div id="step5" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3 id="step5Title">Students</h3>
+          <div style="font-size:.78rem;color:var(--muted)" id="step5Sub"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-success btn-sm" onclick="markAll(true)">✓ All Present</button>
+          <button class="btn btn-danger btn-sm" onclick="markAll(false)">✗ All Absent</button>
+          <button class="btn btn-secondary btn-sm" onclick="goBack(4)">← Back</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding-bottom:0">
+        <div class="ctr">
+          <span class="c-p">✅ Present: <span id="pCnt">0</span></span>
+          <span class="c-a">❌ Absent: <span id="aCnt">0</span></span>
+          <span class="c-t">Total: <span id="tCnt">0</span></span>
+        </div>
+        <div class="tip" id="editTip">💡 Default = <strong style="color:#DC2626">Absent</strong> — tap to toggle <strong style="color:#16A34A">Present</strong></div>
+      </div>
+      <div id="studentsList"></div>
+      <div class="sticky-foot">
+        <span style="font-size:.83rem;color:var(--muted)" id="submitHint">Mark all students then submit</span>
+        <button class="btn btn-primary" id="submitBtn" onclick="openConfirm()" style="padding:10px 28px">Submit &amp; Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header"><h3>Confirm Submission</h3><button class="modal-close" onclick="closeConfirm()">×</button></div>
+    <div class="modal-body"><div id="confirmSummary" style="background:rgba(255,255,255,0.04);border-radius:8px;padding:14px;line-height:2;font-size:.9rem"></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-primary" id="confirmBtn" onclick="submitAttendance()">✓ Confirm &amp; Save</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const token = localStorage.getItem('teacher_token')||'';
+if(!token) window.location.href='/teacher/login/';
+const AH = {'Content-Type':'application/json','Authorization':'Bearer '+token,'X-CSRFToken':getCookie('csrftoken')};
+
+// Fill sidebar user info
+document.getElementById('userAvatar').textContent=(localStorage.getItem('teacher_name')||'T').charAt(0).toUpperCase();
+document.getElementById('userName').textContent=localStorage.getItem('teacher_name')||'Teacher';
+document.getElementById('userRole').textContent='Teacher';
+
+// Date setup
+const todayStr = new Date().toISOString().split('T')[0];
+document.getElementById('dateInput').value = todayStr;
+document.getElementById('dateInput').max   = todayStr;
+document.getElementById('dateInput').addEventListener('change', ()=>{ 
+  if (new Date(document.getElementById('dateInput').value).getDay() === 0) {
+    goBack(1);
+  } else {
+    if(curStep===1) loadDepts();
+    else if(curStep===2) loadClasses(deptId);
+    else if(curStep===3) loadSemesters(classId);
+    else if(curStep===4) loadSubjects();
+    else if(curStep===5) loadStudents();
+  }
+});
+
+let curStep=1, deptId='', deptName='', classId='', className='', semesterId='', semesterName='', subjId='', subjName='', periodNum=1;
+let students=[], attendance={};
+
+/* ── Utility ── */
+function setStep(n){
+  [1,2,3,4,5].forEach(i=>{
+    document.getElementById('step'+i).style.display=(i===n)?'block':'none';
+    const si=document.getElementById('si'+i);
+    si.className='step-item'+(i<n?' done':i===n?' active':'');
+    document.getElementById('sc'+i).textContent=i<n?'✓':i;
+  });
+  curStep=n;
+}
+
+function emptyMsg(msg){ return `<div style="padding:28px;text-align:center;color:var(--muted)">${msg}</div>`; }
+function errMsg(msg){ return `<div style="padding:20px;text-align:center;color:var(--danger)">⚠ ${msg}</div>`; }
+
+function goBack(n){
+  if(n<=2){ classId=''; className=''; }
+  if(n<=3){ semesterId=''; semesterName=''; }
+  if(n<=4){ subjId=''; subjName=''; periodNum=1; }
+  setStep(n);
+  if(n===1) loadDepts();
+  if(n===2) loadClasses(deptId);
+  if(n===3) loadSemesters(classId);
+  if(n===4) loadSubjects();
+}
+
+/* ── STEP 1: Departments ── */
+async function loadDepts(){
+  const dateStr = document.getElementById('dateInput').value;
+  const el=document.getElementById('deptList');
+  if (new Date(dateStr).getDay() === 0) {
+    el.innerHTML=emptyMsg('🌴 Today is Sunday! It is a holiday. Enjoy your day off.');
+    return;
+  }
+  el.innerHTML=emptyMsg('Loading...');
+  try{
+    const depts=await (await fetch('/api/departments/')).json();
+    if(!depts.length){el.innerHTML=emptyMsg('No departments found. Add departments in the admin panel first.');return;}
+    el.innerHTML=depts.map(d=>`
+      <div class="pick-card" onclick="pickDept(${d.id},'${esc(d.name)}')">
+        <div><div class="pc-label">🏛️ ${d.name}</div></div>
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </div>`).join('');
+  }catch(e){el.innerHTML=errMsg('Failed to load departments');}
+}
+
+function pickDept(id,name){ deptId=id; deptName=name; setStep(2); loadClasses(id); }
+
+/* ── STEP 2: Classes ── */
+async function loadClasses(did){
+  const el=document.getElementById('classList');
+  el.innerHTML=emptyMsg('Loading...');
+  try{
+    const cls=await (await fetch(`/api/classes/by-department/${did}/`)).json();
+    if(!cls.length){el.innerHTML=emptyMsg('No classes in this department.');return;}
+    el.innerHTML=cls.map(c=>`
+      <div class="pick-card" onclick="pickClass(${c.id},'${esc(c.name)}')">
+        <div><div class="pc-label">📂 ${c.name}</div><div class="pc-sub">Year ${c.year||'—'}</div></div>
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </div>`).join('');
+  }catch(e){el.innerHTML=errMsg('Failed to load classes');}
+}
+
+function pickClass(id,name){ classId=id; className=name; setStep(3); loadSemesters(id); }
+
+/* ── STEP 3: Semesters ── */
+async function loadSemesters(cid){
+  const el=document.getElementById('semesterList');
+  el.innerHTML=emptyMsg('Loading...');
+  try{
+    const sems=await (await fetch(`/api/classes/${cid}/semesters/`)).json();
+    if(!sems.length){el.innerHTML=emptyMsg('No semesters found.');return;}
+    el.innerHTML=sems.map(s=>`
+      <div class="pick-card" onclick="pickSemester(${s.id},'${esc(s.name)}')">
+        <div><div class="pc-label"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${s.name}</div></div>
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </div>`).join('');
+  }catch(e){el.innerHTML=errMsg('Failed to load semesters');}
+}
+
+function pickSemester(id,name){ semesterId=id; semesterName=name; setStep(4); loadSubjects(); }
+
+/* ── STEP 4: Subjects from timetable ── */
+async function loadSubjects(){
+  const grid=document.getElementById('subjectGrid');
+  document.getElementById('step4Title').innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Today's Subjects — ${className} ${semesterName}`;
+  const date=document.getElementById('dateInput').value;
+  const dayName=new Date(date+'T00:00:00').toLocaleDateString('en-US',{weekday:'long'});
+  document.getElementById('step4Sub').textContent=`${dayName} · Based on weekly timetable`;
+  grid.innerHTML=emptyMsg('Loading subjects...');
+  try{
+    const [ttRes, attRes] = await Promise.all([
+      fetch(`/api/timetable/semester/${semesterId}/?day=${dayName}`),
+      fetch(`/api/attendance/status/?semester_id=${semesterId}&date=${date}`)
+    ]);
+    if(!ttRes.ok || !attRes.ok) throw new Error('API error');
+    const periods = await ttRes.json();
+    const attStatus = await attRes.json();
+
+    if(!periods.length){
+      grid.innerHTML=emptyMsg(`No subjects scheduled for ${dayName}. Set up the weekly timetable in the <a href="/teacher/timetable/" style="color:var(--primary)">Teacher Panel → Timetable</a>.`);
+      return;
+    }
+
+    // Build per-subject marked periods map: subject_id -> [period_numbers]
+    const markedPeriodsMap = {};
+    attStatus.forEach(a=>{ markedPeriodsMap[a.subject_id] = a.marked_periods || []; });
+
+    // Each timetable period is shown as a separate card with its own marking status
+    grid.innerHTML = periods.map(p=>{
+      const markedPeriods = markedPeriodsMap[p.subject_id] || [];
+      const marked = markedPeriods.includes(p.period_number);
+      return `<div class="subj-card${marked?' marked':''}" onclick="pickSubject(${p.subject_id},'${esc(p.subject_name)}',${p.period_number})">
+        ${marked?'<span class="mb">✓ Marked</span>':''}
+        <div class="sn">${p.subject_name}</div>
+        <div class="sm">P${p.period_number} · ${p.start_time}–${p.end_time}</div>
+        <div class="ss">
+          ${marked
+            ? `<div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+                 <span>✅ Saved</span>
+                 <button onclick="event.stopPropagation();sendSubjectNotification(${p.subject_id}, this)" class="btn btn-sm" style="background:var(--card);border:1px solid #16A34A;color:#16A34A;padding:2px 8px;font-size:0.7rem;border-radius:4px">📧 Notify Parents</button>
+               </div>`
+            : `<span style="color:var(--primary)">Click to mark →</span>`}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    console.error(e);
+    grid.innerHTML=errMsg('Failed to load subjects. Check server connection.');
+  }
+}
+
+async function sendSubjectNotification(subjectId, btn) {
+  const date = document.getElementById('dateInput').value;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Sending...';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch('/api/notifications/send-alerts/', {
+      method: 'POST',
+      headers: AH,
+      body: JSON.stringify({ date, subject_id: subjectId })
+    });
+    const data = await res.json();
+    if(res.ok) {
+      showToast(data.message || 'Notifications sent!', 'success');
+      btn.innerHTML = '✓ Sent';
+      btn.style.background = '#16A34A';
+      btn.style.color = 'white';
+    } else {
+      showToast(data.error || 'Failed to send notifications', 'error');
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+  } catch(e) {
+    showToast('Connection error', 'error');
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+
+function pickSubject(id,name,pNum){ subjId=id; subjName=name; periodNum=pNum||1; setStep(5); loadStudents(); }
+
+/* ── STEP 5: Students ── */
+async function loadStudents(){
+  const list=document.getElementById('studentsList');
+  const date=document.getElementById('dateInput').value;
+  document.getElementById('step5Title').textContent=`${subjName} — Period ${periodNum}`;
+  document.getElementById('step5Sub').textContent=`${className} ${semesterName} · ${date}`;
+  list.innerHTML=emptyMsg('Loading students...');
+  try{
+    const [stRes, aRes] = await Promise.all([
+      fetch(`/api/students/?class_id=${classId}`),
+      fetch(`/api/attendance/list/?subject_id=${subjId}&date=${date}&period_number=${periodNum}`)
+    ]);
+    if(!stRes.ok) throw new Error('Students API error '+stRes.status);
+    students = await stRes.json();
+    const existing = await aRes.json();
+    if(!students.length){list.innerHTML=emptyMsg('No students in this class. Upload students first.');return;}
+    // Default all absent, overlay existing
+    attendance={};
+    students.forEach(s=>{ attendance[s.student_id]=false; });
+    existing.forEach(a=>{ attendance[a.student_id]=a.is_present; });
+    renderStudents();
+    updateCtr();
+  }catch(e){
+    console.error(e);
+    list.innerHTML=errMsg(`Failed to load students (${e.message})`);
+  }
+}
+
+function renderStudents(){
+  const date = document.getElementById('dateInput').value;
+  const today = new Date().toISOString().split('T')[0];
+  const isToday = date === today;
+  
+  if(!isToday) {
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('editTip').innerHTML = '🔒 <strong>Past attendance is locked.</strong> You can only edit today\'s attendance.';
+    document.getElementById('submitHint').style.display = 'none';
+  } else {
+    document.getElementById('submitBtn').style.display = 'block';
+    document.getElementById('submitBtn').innerHTML = 'Submit &amp; Save';
+    document.getElementById('editTip').innerHTML = '💡 Default = <strong style="color:#DC2626">Absent</strong> — tap to toggle <strong style="color:#16A34A">Present</strong>';
+    document.getElementById('submitHint').style.display = 'inline';
+  }
+
+  document.getElementById('studentsList').innerHTML=students.map(s=>{
+    const init=(s.name||s.student_id).substring(0,2).toUpperCase();
+    const p=attendance[s.student_id]===true;
+    return `<div class="srow">
+      <div class="savatar" style="cursor:pointer" onclick="viewStudent('${s.student_id}')" title="View Student Dashboard">${init}</div>
+      <div class="sname"><div class="n" style="cursor:pointer;color:var(--text)" onclick="viewStudent('${s.student_id}')">${s.name||s.student_id}</div><div class="i">${s.student_id}</div></div>
+      <button class="tog ${p?'present':'absent'}" id="tog_${s.student_id}" ${!isToday ? 'disabled style="opacity:0.6;cursor:not-allowed"' : `onclick="toggle('${s.student_id}')"`}>
+        ${p?'✅ Present':'❌ Absent'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function viewStudent(studentId) {
+  window.open(`/teacher/students/${studentId}/`, '_blank');
+}
+
+function toggle(id){
+  attendance[id]=!attendance[id];
+  const btn=document.getElementById('tog_'+id);
+  btn.className='tog '+(attendance[id]?'present':'absent');
+  btn.textContent=attendance[id]?'✅ Present':'❌ Absent';
+  updateCtr();
+}
+
+function markAll(v){
+  const date = document.getElementById('dateInput').value;
+  const today = new Date().toISOString().split('T')[0];
+  if(date !== today) {
+    showToast('Cannot edit past attendance', 'error');
+    return;
+  }
+  
+  students.forEach(s=>{
+    attendance[s.student_id]=v;
+    const btn=document.getElementById('tog_'+s.student_id);
+    if(btn){btn.className='tog '+(v?'present':'absent');btn.textContent=v?'✅ Present':'❌ Absent';}
+  });
+  updateCtr();
+}
+
+function updateCtr(){
+  const p=Object.values(attendance).filter(v=>v===true).length;
+  document.getElementById('pCnt').textContent=p;
+  document.getElementById('aCnt').textContent=students.length-p;
+  document.getElementById('tCnt').textContent=students.length;
+}
+
+function openConfirm(){
+  const date=document.getElementById('dateInput').value;
+  const p=Object.values(attendance).filter(v=>v).length;
+  document.getElementById('confirmSummary').innerHTML=`
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> <strong>Subject:</strong> ${subjName}<br>
+    🔢 <strong>Period:</strong> ${periodNum}<br>
+    📂 <strong>Class:</strong> ${className}<br>
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> <strong>Semester:</strong> ${semesterName}<br>
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> <strong>Date:</strong> ${date}<br>
+    ✅ <strong>Present:</strong> ${p}<br>
+    ❌ <strong>Absent:</strong> ${students.length-p}`;
+  document.getElementById('confirmModal').classList.add('open');
+}
+function closeConfirm(){ document.getElementById('confirmModal').classList.remove('open'); }
+
+async function submitAttendance(){
+  const date=document.getElementById('dateInput').value;
+  if(!students.length){showToast('No students loaded','error');return;}
+  
+  // Use /api/attendance/edit/ for updates, but loop over students since edit is one-by-one, 
+  // or use the existing /api/attendance/mark/ since it uses update_or_create under the hood!
+  const records=students.map(s=>({student_id:s.student_id,is_present:attendance[s.student_id]===true}));
+  const btn=document.getElementById('confirmBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Saving...';
+  try{
+    const res=await fetch('/api/attendance/mark/',{
+      method:'POST',headers:AH,
+      body:JSON.stringify({subject_id:subjId,date,period_number:periodNum,records})
+    });
+    let data={};
+    try{data=await res.json();}catch(_){}
+    if(res.ok){
+      showToast(data.message||'Attendance saved!','success');
+      closeConfirm();
+      goBack(4);   // Return to subject list — subject will turn green
+    } else {
+      showToast(data.error||`Server error (${res.status})`,'error');
+    }
+  }catch(e){
+    showToast('Connection error — server not reachable','error');
+  }
+  btn.disabled=false; btn.innerHTML='✓ Confirm &amp; Save';
+}
+
+function esc(s){ return String(s).replace(/'/g,"\\'"); }
+
+/* Boot */
+loadDepts();
+</script>
+{% endblock %}

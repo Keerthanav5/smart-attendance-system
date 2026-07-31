@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Upload Students — RPA Smart Attendance System{% endblock %}
+{% block page_title %}Upload Students{% endblock %}
+{% block notif_bell %}{% endblock %}
+{% block sidebar_links %}
+<div class="nav-section">Main</div>
+<a class="nav-link" href="/admin-dashboard/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<div class="nav-section">Management</div>
+<a class="nav-link" href="/admin/departments/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/></svg> Departments</a>
+<a class="nav-link" href="/admin/classes/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Classes</a>
+<a class="nav-link" href="/admin/subjects/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Subjects</a>
+<a class="nav-link" href="/admin/teachers/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Teachers</a>
+<a class="nav-link" href="/admin/students/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg> Students</a>
+
+<div class="nav-section">Academic</div>
+<a class="nav-link" href="/admin/reports/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Reports</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="page-header">
+    <div>
+      <h1>Upload Students</h1>
+      <p style="color:var(--muted);font-size:0.85rem;margin-top:4px">Upload Excel or CSV files to bulk import students.</p>
+    </div>
+    <a href="/admin/students/" class="btn btn-secondary">← Back to Students</a>
+  </div>
+
+  <div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>Bulk Import</h3>
+      <a href="/api/students/upload-template/" class="btn btn-secondary btn-sm">📥 Download Template</a>
+    </div>
+    <div class="card-body">
+      <div style="margin-bottom: 20px;">
+        <label class="form-label">Department (Optional)</label>
+        <select id="deptSelect" class="form-select" onchange="loadClasses()">
+          <option value="">— Select Department (Override CSV) —</option>
+        </select>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-top: 4px;">If selected, all students in the file will be assigned to this department.</div>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label class="form-label">Class (Optional)</label>
+        <select id="classSelect" class="form-select">
+          <option value="">— Select Class (Override CSV) —</option>
+        </select>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-top: 4px;">If selected, all students in the file will be assigned to this class.</div>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label class="form-label">Upload File (.xlsx or .csv)</label>
+        <input type="file" id="fileInput" class="form-control" accept=".xlsx, .csv">
+      </div>
+      <button class="btn btn-primary" id="uploadBtn" onclick="uploadFile()" style="width:100%;">Upload Students</button>
+
+      <div id="uploadResult" style="margin-top: 20px; display: none;">
+         <!-- results will go here -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function loadDepts() {
+  try {
+    const res = await fetch('/api/departments/');
+    const depts = await res.json();
+    const sel = document.getElementById('deptSelect');
+    sel.innerHTML += depts.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  } catch(e) {
+    showToast('Failed to load departments', 'error');
+  }
+}
+
+async function loadClasses() {
+  const deptId = document.getElementById('deptSelect').value;
+  const sel = document.getElementById('classSelect');
+  if (!deptId) {
+    sel.innerHTML = '<option value="">— Select Class (Override CSV) —</option>';
+    return;
+  }
+  try {
+    const res = await fetch(`/api/classes/by-department/${deptId}/`);
+    const classes = await res.json();
+    sel.innerHTML = '<option value="">— Select Class (Override CSV) —</option>' + classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  } catch(e) {
+    showToast('Failed to load classes', 'error');
+  }
+}
+loadDepts();
+
+async function uploadFile() {
+  const fileInput = document.getElementById('fileInput');
+  const file = fileInput.files[0];
+  if (!file) {
+    showToast('Please select a file first.', 'error');
+    return;
+  }
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const deptId = document.getElementById('deptSelect').value;
+  const classId = document.getElementById('classSelect').value;
+  if (deptId) formData.append('department_id', deptId);
+  if (classId) formData.append('class_id', classId);
+
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Uploading...';
+  
+  try {
+    const res = await fetch('/api/students/bulk-upload/', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    
+    const resultDiv = document.getElementById('uploadResult');
+    resultDiv.style.display = 'block';
+    
+    if (res.ok) {
+      let html = `<div style="padding: 16px; background: #DCFCE7; color: #16A34A; border-radius: 8px;">
+        <strong>Success!</strong> ${data.success} out of ${data.total} rows uploaded.
+      </div>`;
+      if (data.error_count > 0) {
+         html += `<div style="margin-top: 10px; padding: 16px; background: #FEE2E2; color: #DC2626; border-radius: 8px;">
+           <strong>${data.error_count} errors occurred.</strong> 
+           ${data.error_file_url ? `<br><a href="${data.error_file_url}" style="color: #DC2626; text-decoration: underline;" download>Download Error Report</a>` : ''}
+         </div>`;
+      }
+      resultDiv.innerHTML = html;
+      if (data.error_count === 0 && data.success > 0) {
+        showToast('Upload complete!', 'success');
+        setTimeout(() => window.location.href='/admin/students/', 1500);
+      }
+    } else {
+      resultDiv.innerHTML = `<div style="padding: 16px; background: #FEE2E2; color: #DC2626; border-radius: 8px;"><strong>Error:</strong> ${data.error}</div>`;
+      showToast('Upload failed', 'error');
+    }
+  } catch (e) {
+    showToast('Connection error', 'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = 'Upload Students';
+}
+</script>
+{% endblock %}

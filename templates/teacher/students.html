@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+{% block title %}Students — RPA Smart Attendance System{% endblock %}
+{% block page_title %}Students{% endblock %}
+{% block sidebar_links %}
+<div class="nav-section">Teacher Portal</div>
+<a class="nav-link" href="/teacher/dashboard/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<a class="nav-link" href="/teacher/mark-attendance/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg> Mark Attendance</a>
+<a class="nav-link" href="/teacher/edit-attendance/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg> Edit Attendance</a>
+<a class="nav-link" href="/teacher/attendance-percentage/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Attendance Percentage</a>
+<a class="nav-link" href="/teacher/timetable/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Timetable</a>
+<a class="nav-link" href="/teacher/notifications/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Notifications</a>
+<a class="nav-link" href="/teacher/students/"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 4 3 6 3s6-2 6-3v-5"/></svg> Students View</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.filter-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.search-input{padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:.875rem;outline:none;min-width:220px;font-family:inherit}
+.search-input:focus{border-color:var(--primary)}
+.pct-bar{height:6px;background:var(--border);border-radius:99px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:8px}
+.pct-fill{height:100%;border-radius:99px}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="page-header">
+    <h1>Students</h1>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-warning" onclick="openBulkReportModal()">📧 Send Reports</button>
+      <a href="/admin/students/upload/" class="btn btn-success"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Upload Excel / CSV</a>
+      <button class="btn btn-primary" onclick="openAddModal()">+ Add Student</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>All Students</h3>
+      <div class="filter-bar" style="margin:0">
+        <input class="search-input" type="text" id="searchInput" placeholder="Search name or register no..." oninput="filterStudents()">
+        <select class="form-select" id="filterClass" onchange="filterStudents()" style="width:auto">
+          <option value="">All Classes</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Register No</th><th>Name</th><th>Class</th><th>Department</th>
+              <th>Parent Email</th><th>Attendance %</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentsTable">
+            <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Loading students...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Add Student</h3>
+      <button class="modal-close" onclick="closeModal('addModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editStudentId">
+
+      <!-- Basic Info -->
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Register Number <span style="color:var(--danger)">*</span></label>
+          <input class="form-control" id="fStudentId" placeholder="e.g. 22UUCMS001">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Full Name <span style="color:var(--danger)">*</span></label>
+          <input class="form-control" id="fName" placeholder="Student full name">
+        </div>
+      </div>
+
+      <!-- Department & Class — REQUIRED -->
+      <div style="background:var(--primary-light);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+        <div style="font-size:.8rem;font-weight:700;color:var(--primary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">📂 Academic Placement <span style="color:var(--danger)">*</span></div>
+        <div class="grid-2">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" style="font-size:.82rem">Department <span style="color:var(--danger)">*</span></label>
+            <select class="form-select" id="fDept" onchange="loadClassesForForm()">
+              <option value="">— Select Department —</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" style="font-size:.82rem">Class <span style="color:var(--danger)">*</span></label>
+            <select class="form-select" id="fClass">
+              <option value="">— Select Department first —</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact info -->
+      <div class="form-group">
+        <label class="form-label">Student Email</label>
+        <input class="form-control" id="fEmail" type="email" placeholder="student@email.com">
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Parent Name</label>
+          <input class="form-control" id="fParentName" placeholder="Parent / Guardian name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Parent Phone</label>
+          <input class="form-control" id="fParentPhone" placeholder="9876543210">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Parent Email <span style="color:var(--danger)">*</span></label>
+        <input class="form-control" id="fParentEmail" type="email" placeholder="parent@email.com">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveStudentBtn" onclick="saveStudent()">Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Report Modal -->
+<div class="modal-overlay" id="bulkReportModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header"><h3>Send Attendance Reports</h3><button class="modal-close" onclick="closeModal('bulkReportModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Select Target Audience</label>
+        <select class="form-select" id="bulkReportTarget">
+          <option value="all">All Students (Overall)</option>
+        </select>
+      </div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-top:10px">This will send an email (if available) with the detailed attendance report to the parents of the selected students.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('bulkReportModal')">Cancel</button>
+      <button class="btn btn-primary" id="sendBulkBtn" onclick="sendBulkReports()">📧 Send Reports</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header"><h3>Delete Student</h3><button class="modal-close" onclick="closeModal('deleteModal')">×</button></div>
+    <div class="modal-body"><p style="color:var(--muted)">Are you sure you want to delete <strong id="deleteStudentName"></strong>? This will also delete all their attendance records.</p></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCookie(n){const v=`; ${document.cookie}`,p=v.split(`; ${n}=`);if(p.length===2)return p.pop().split(';').shift();return '';}
+let allStudents=[];let deleteTarget='';
+
+async function loadStudents(){
+  try{
+    const res=await fetch('/api/students/');
+    allStudents=await res.json();
+    renderStudents(allStudents);
+  }catch(e){document.getElementById('studentsTable').innerHTML='<tr><td colspan="8" style="text-align:center;color:#DC2626;padding:24px">Failed to load students</td></tr>';}
+}
+
+function renderStudents(students){
+  const tbody=document.getElementById('studentsTable');
+  if(!students.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px">No students found. <a href="/admin/students/upload/" style="color:var(--primary)">Upload via Excel/CSV</a></td></tr>';return;}
+  tbody.innerHTML=students.map(s=>{
+    const pct=s.attendance_percent||0;
+    const color=pct>=75?'#16A34A':pct>=60?'#D97706':'#DC2626';
+    const badge=pct>=75?'badge-success':pct>=60?'badge-warning':'badge-danger';
+    const status=pct>=75?'Safe':pct>=60?'At Risk':'Danger';
+    return `<tr>
+      <td><strong>${s.student_id}</strong></td>
+      <td>${s.name||'—'}</td>
+      <td>${s.class_name||'—'}</td>
+      <td>${s.department||'—'}</td>
+      <td style="font-size:.82rem">${s.parent_email||'—'}</td>
+      <td>
+        <span style="font-weight:700;color:${color}">${pct}%</span>
+        <div class="pct-bar"><div class="pct-fill" style="width:${pct}%;background:${color}"></div></div>
+      </td>
+      <td><span class="badge ${badge}">${status}</span></td>
+      <td>
+        <a href="/teacher/students/${s.student_id}/" class="btn btn-primary btn-sm">View</a>
+        <button class="btn btn-secondary btn-sm" onclick='editStudent(${JSON.stringify(s)})'>Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.student_id}','${s.name||s.student_id}')">Delete</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterStudents(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const cls=document.getElementById('filterClass').value;
+  const filtered=allStudents.filter(s=>{
+    const matchQ=!q||(s.name||'').toLowerCase().includes(q)||(s.student_id||'').toLowerCase().includes(q);
+    const matchCls=!cls||s.class_name===cls;
+    return matchQ&&matchCls;
+  });
+  renderStudents(filtered);
+}
+
+async function loadDepts(){
+  const res=await fetch('/api/departments/');
+  const depts=await res.json();
+  const sel=document.getElementById('fDept');
+  sel.innerHTML='<option value="">Select Department</option>'+depts.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  
+  // Load all classes for filter bar
+  const allClasses=[...new Set(allStudents.map(s=>s.class_name).filter(Boolean))];
+  const classFilter=document.getElementById('filterClass');
+  classFilter.innerHTML='<option value="">All Classes</option>'+allClasses.map(c=>`<option value="${c}">${c}</option>`).join('');
+
+  // Populate bulk report dropdown
+  const bulkTarget=document.getElementById('bulkReportTarget');
+  const classPairs = [];
+  const seenClassIds = new Set();
+  allStudents.forEach(s => {
+    if (s.assigned_class_id && !seenClassIds.has(s.assigned_class_id)) {
+      seenClassIds.add(s.assigned_class_id);
+      classPairs.push({ id: s.assigned_class_id, name: s.class_name });
+    }
+  });
+  if (bulkTarget) {
+    bulkTarget.innerHTML='<option value="all">All Students (Overall)</option>'+classPairs.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  }
+}
+
+async function loadClassesForForm(){
+  const deptId=document.getElementById('fDept').value;
+  const res=await fetch(`/api/classes/by-department/${deptId}/`);
+  const classes=await res.json();
+  document.getElementById('fClass').innerHTML='<option value="">Select Class</option>'+classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+}
+
+function openAddModal(){
+  document.getElementById('modalTitle').textContent='Add Student';
+  document.getElementById('editStudentId').value='';
+  ['fStudentId','fName','fEmail','fParentName','fParentPhone','fParentEmail'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fStudentId').disabled=false;
+  // Reset dept/class dropdowns
+  document.getElementById('fDept').value='';
+  document.getElementById('fClass').innerHTML='<option value="">— Select Department first —</option>';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function editStudent(s){
+  document.getElementById('modalTitle').textContent='Edit Student';
+  document.getElementById('editStudentId').value=s.student_id;
+  document.getElementById('fStudentId').value=s.student_id;
+  document.getElementById('fStudentId').disabled=true;
+  document.getElementById('fName').value=s.name||'';
+  document.getElementById('fEmail').value=s.email||'';
+  document.getElementById('fParentName').value=s.parent_name||'';
+  document.getElementById('fParentPhone').value=s.parent_phone||'';
+  document.getElementById('fParentEmail').value=s.parent_email||'';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function deleteStudent(id,name){deleteTarget=id;document.getElementById('deleteStudentName').textContent=name;document.getElementById('deleteModal').classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+function openBulkReportModal() {
+  document.getElementById('bulkReportModal').classList.add('open');
+}
+
+async function sendBulkReports() {
+  const targetId = document.getElementById('bulkReportTarget').value;
+  const btn = document.getElementById('sendBulkBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Sending...';
+  const token = localStorage.getItem('teacher_token') || '';
+  try {
+    const res = await fetch('/api/students/send-bulk-reports/', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json', 
+        'X-CSRFToken': getCookie('csrftoken'),
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ class_id: targetId })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(data.message || 'Reports sent!', 'success');
+      closeModal('bulkReportModal');
+    } else {
+      showToast(data.error || 'Failed to send reports', 'error');
+    }
+  } catch(e) {
+    showToast('Connection error', 'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '📧 Send Reports';
+}
+
+async function saveStudent(){
+  const editId=document.getElementById('editStudentId').value;
+  const body={
+    student_id:document.getElementById('fStudentId').value.trim(),
+    name:document.getElementById('fName').value.trim(),
+    email:document.getElementById('fEmail').value.trim(),
+    parent_name:document.getElementById('fParentName').value.trim(),
+    parent_phone:document.getElementById('fParentPhone').value.trim(),
+    parent_email:document.getElementById('fParentEmail').value.trim(),
+    department_id:document.getElementById('fDept').value,
+    class_id:document.getElementById('fClass').value,
+  };
+  // Validation
+  if(!body.student_id){showToast('Register number is required','error');document.getElementById('fStudentId').focus();return;}
+  if(!body.name){showToast('Student name is required','error');document.getElementById('fName').focus();return;}
+  if(!body.department_id){showToast('Please select a Department','error');document.getElementById('fDept').focus();return;}
+  if(!body.class_id){showToast('Please select a Class','error');document.getElementById('fClass').focus();return;}
+  if(!body.parent_email){showToast('Parent email is required','error');document.getElementById('fParentEmail').focus();return;}
+  const btn=document.getElementById('saveStudentBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Saving...';
+  try{
+    const url=editId?`/api/students/${editId}/`:'/api/students/';
+    const method=editId?'PUT':'POST';
+    const res=await fetch(url,{method,headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},body:JSON.stringify(body)});
+    const data=await res.json();
+    if(res.ok){showToast(editId?'Student updated!':'Student added!','success');closeModal('addModal');loadStudents();}
+    else{showToast(data.error||'Failed to save','error');}
+  }catch(e){showToast('Connection error','error');}
+  btn.disabled=false;btn.innerHTML='Save Student';
+}
+
+async function confirmDelete(){
+  try{
+    const res=await fetch(`/api/students/${deleteTarget}/`,{method:'DELETE',headers:{'X-CSRFToken':getCookie('csrftoken')}});
+    if(res.ok){showToast('Student deleted','success');closeModal('deleteModal');loadStudents();}
+    else{showToast('Failed to delete','error');}
+  }catch(e){showToast('Connection error','error');}
+}
+
+loadStudents().then(()=>loadDepts());
+</script>
+{% endblock %}
