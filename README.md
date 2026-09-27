@@ -150,11 +150,13 @@ Visit: http://127.0.0.1:8000/
 
 ---
 
-## 📦 Tech Stack
+## 🛠️ Tech Stack
 
-- **Backend**: Django 4.2, Django REST Framework
-- **Database**: MySQL (via mysqlclient)
-- **Auth**: Django sessions (admin) + JWT (teacher/student)
-- **Email**: Gmail SMTP
-- **Frontend**: Vanilla JS + Chart.js (no framework)
-- **Excel**: openpyxl, xlsxwriter
+| Category | Technologies |
+|---|---|
+| Backend | Python, Django 4.2, Django REST Framework |
+| Database | MySQL, mysqlclient |
+| Authentication | Django Sessions, JWT |
+| Frontend | HTML, CSS, JavaScript, Chart.js |
+| Email | Gmail SMTP |
+| Excel / Reports | openpyxl, xlsxwriter |
