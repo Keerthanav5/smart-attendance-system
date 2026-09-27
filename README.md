@@ -16,6 +16,17 @@ A web-based attendance management system for colleges, built with Django and MyS
 - 🔐 Role-based authentication and password security
 - 🔑 JWT-based authentication for Teacher and Student portals
 
+## 📁 Project Structure
+
+```text
+smart_attendance/
+├── backend/          # Django project and application code
+├── templates/        # HTML templates
+├── static/           # CSS and JavaScript files
+├── media/            # Uploaded files
+├── .env.example      # Environment variable template
+└── requirements.txt  # Python dependencies
+
 ## 🚀 Quick Setup
 
 ### 1. Clone / extract the project
