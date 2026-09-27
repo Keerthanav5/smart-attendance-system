@@ -1,7 +1,6 @@
-# Smart Attendance System — v2
+# Smart Attendance System
 
-A Django + MySQL attendance management system for colleges with Admin, Teacher, and Student portals.
-
+A web-based attendance management system for colleges, built with Django and MySQL. The system provides separate portals for Admin, Teacher, and Student users to manage attendance, academic data, reports, and notifications.
 ---
 
 ## 🚀 Quick Setup
