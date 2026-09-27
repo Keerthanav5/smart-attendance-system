@@ -3,6 +3,19 @@
 A web-based attendance management system for colleges, built with Django and MySQL. The system provides separate portals for Admin, Teacher, and Student users to manage attendance, academic data, reports, and notifications.
 ---
 
+## ✨ Features
+
+- 👤 Separate Admin, Teacher, and Student portals
+- 🏫 Department, class, subject, teacher, and student management
+- 📊 Attendance marking and subject-wise attendance tracking
+- 📈 Attendance analytics and reports
+- 📄 Attendance report generation
+- 📥 Bulk student upload using Excel/CSV
+- 📧 Email notifications for absent students
+- 🗓️ Timetable and holiday management
+- 🔐 Role-based authentication and password security
+- 🔑 JWT-based authentication for Teacher and Student portals
+
 ## 🚀 Quick Setup
 
 ### 1. Clone / extract the project
